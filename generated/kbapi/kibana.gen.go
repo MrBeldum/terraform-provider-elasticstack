@@ -1790,9 +1790,9 @@ func (e KibanaHTTPAPIsAiopsPatternAnalysisRandomSamplerMode) Valid() bool {
 
 // Defines values for KibanaHTTPAPIsAlertingActionPolicyGroupingMode.
 const (
-	KibanaHTTPAPIsAlertingActionPolicyGroupingModeAll        KibanaHTTPAPIsAlertingActionPolicyGroupingMode = "all"
-	KibanaHTTPAPIsAlertingActionPolicyGroupingModePerEpisode KibanaHTTPAPIsAlertingActionPolicyGroupingMode = "per_episode"
-	KibanaHTTPAPIsAlertingActionPolicyGroupingModePerField   KibanaHTTPAPIsAlertingActionPolicyGroupingMode = "per_field"
+	KibanaHTTPAPIsAlertingActionPolicyGroupingModeAll      KibanaHTTPAPIsAlertingActionPolicyGroupingMode = "all"
+	KibanaHTTPAPIsAlertingActionPolicyGroupingModePerAlert KibanaHTTPAPIsAlertingActionPolicyGroupingMode = "per_alert"
+	KibanaHTTPAPIsAlertingActionPolicyGroupingModePerField KibanaHTTPAPIsAlertingActionPolicyGroupingMode = "per_field"
 )
 
 // Valid indicates whether the value is a known member of the KibanaHTTPAPIsAlertingActionPolicyGroupingMode enum.
@@ -1800,7 +1800,7 @@ func (e KibanaHTTPAPIsAlertingActionPolicyGroupingMode) Valid() bool {
 	switch e {
 	case KibanaHTTPAPIsAlertingActionPolicyGroupingModeAll:
 		return true
-	case KibanaHTTPAPIsAlertingActionPolicyGroupingModePerEpisode:
+	case KibanaHTTPAPIsAlertingActionPolicyGroupingModePerAlert:
 		return true
 	case KibanaHTTPAPIsAlertingActionPolicyGroupingModePerField:
 		return true
@@ -23322,6 +23322,21 @@ func (e SecurityTimelineAPITimelineType) Valid() bool {
 	}
 }
 
+// Defines values for SyntheticsApiMonitorFieldsType.
+const (
+	Api SyntheticsApiMonitorFieldsType = "api"
+)
+
+// Valid indicates whether the value is a known member of the SyntheticsApiMonitorFieldsType enum.
+func (e SyntheticsApiMonitorFieldsType) Valid() bool {
+	switch e {
+	case Api:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for SyntheticsBrowserMonitorFieldsScreenshots.
 const (
 	SyntheticsBrowserMonitorFieldsScreenshotsOff           SyntheticsBrowserMonitorFieldsScreenshots = "off"
@@ -34368,6 +34383,9 @@ type CasesSetCaseConfigurationRequest struct {
 	// Owner The application that owns the cases: Stack Management, Observability, or Elastic Security.
 	Owner     CasesOwner      `json:"owner"`
 	Templates *CasesTemplates `json:"templates,omitempty"`
+
+	// WorkflowTags Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+	WorkflowTags *[]string `json:"workflowTags,omitempty"`
 }
 
 // CasesSetCaseConfigurationRequestCustomFieldsDefaultValue0 defines model for .
@@ -34649,6 +34667,9 @@ type CasesUpdateCaseConfigurationRequest struct {
 
 	// Version The version of the connector. To retrieve the version value, use the get configuration API.
 	Version string `json:"version"`
+
+	// WorkflowTags Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+	WorkflowTags *[]string `json:"workflowTags,omitempty"`
 }
 
 // CasesUpdateCaseConfigurationRequestCustomFieldsDefaultValue0 defines model for .
@@ -36872,7 +36893,7 @@ type KibanaHTTPAPIsAlertingActionPolicyDestination struct {
 	union json.RawMessage
 }
 
-// KibanaHTTPAPIsAlertingActionPolicyGroupingMode The grouping mode: per_episode groups by episode lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.
+// KibanaHTTPAPIsAlertingActionPolicyGroupingMode The grouping mode: per_alert groups by alert lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.
 type KibanaHTTPAPIsAlertingActionPolicyGroupingMode string
 
 // KibanaHTTPAPIsAlertingActionPolicyResponse defines model for Kibana_HTTP_APIs_alerting_action_policy_response.
@@ -36985,7 +37006,7 @@ type KibanaHTTPAPIsAlertingBulkAssignEpisodesItem struct {
 	// AlertId Identifier of the alert to apply the action to.
 	AlertId string `json:"alert_id"`
 
-	// AssigneeUid User profile UID of the assignee, or null to remove the assignee from the episode.
+	// AssigneeUid User profile UID of the assignee, or null to remove the assignee from the alert.
 	AssigneeUid *string `json:"assignee_uid,omitempty"`
 }
 
@@ -37045,7 +37066,7 @@ type KibanaHTTPAPIsAlertingBulkCreateRuleItem struct {
 	// Query ES|QL query the rule evaluates. `base` is required. `breach` is an optional clause appended to it.
 	Query KibanaHTTPAPIsAlertingRuleQuery `json:"query"`
 
-	// Recovery When an alert episode recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.
+	// Recovery When an alert recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.
 	Recovery *KibanaHTTPAPIsAlertingRuleRecovery `json:"recovery,omitempty"`
 
 	// Schedule Execution schedule configuration.
@@ -37061,8 +37082,8 @@ type KibanaHTTPAPIsAlertingBulkCreateRuleItemKind string
 
 // KibanaHTTPAPIsAlertingBulkCreateRulesRequest defines model for Kibana_HTTP_APIs_alerting_bulk_create_rules_request.
 type KibanaHTTPAPIsAlertingBulkCreateRulesRequest struct {
-	// Rules The rules to create. Must contain between 1 and 100 rules.
-	Rules []KibanaHTTPAPIsAlertingBulkCreateRuleItem `json:"rules"`
+	// Items The rules to create. Must contain between 1 and 100 rules.
+	Items []KibanaHTTPAPIsAlertingBulkCreateRuleItem `json:"items"`
 }
 
 // KibanaHTTPAPIsAlertingBulkCreateRulesResponse defines model for Kibana_HTTP_APIs_alerting_bulk_create_rules_response.
@@ -37155,7 +37176,7 @@ type KibanaHTTPAPIsAlertingBulkTagEpisodesItem struct {
 	// AlertId Identifier of the alert to apply the action to.
 	AlertId string `json:"alert_id"`
 
-	// Tags Replaces the episode's tags. Send `[]` to clear.
+	// Tags Replaces the alert's tags. Send `[]` to clear.
 	Tags []string `json:"tags"`
 }
 
@@ -37206,7 +37227,7 @@ type KibanaHTTPAPIsAlertingNewActionPolicy struct {
 	// GroupBy The fields used to group alerts.
 	GroupBy *[]string `json:"group_by,omitempty"`
 
-	// GroupingMode The grouping mode: per_episode groups by episode lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.
+	// GroupingMode The grouping mode: per_alert groups by alert lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.
 	GroupingMode *KibanaHTTPAPIsAlertingActionPolicyGroupingMode `json:"grouping_mode,omitempty"`
 
 	// Matcher Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts.
@@ -37231,7 +37252,7 @@ type KibanaHTTPAPIsAlertingNewActivateEpisodeAction struct {
 
 // KibanaHTTPAPIsAlertingNewAssignEpisodeAction defines model for Kibana_HTTP_APIs_alerting_new_assign_episode_action.
 type KibanaHTTPAPIsAlertingNewAssignEpisodeAction struct {
-	// AssigneeUid User profile UID of the assignee, or null to remove the assignee from the episode.
+	// AssigneeUid User profile UID of the assignee, or null to remove the assignee from the alert.
 	AssigneeUid *string `json:"assignee_uid,omitempty"`
 }
 
@@ -37261,7 +37282,7 @@ type KibanaHTTPAPIsAlertingNewRule struct {
 	// Query ES|QL query the rule evaluates. `base` is required. `breach` is an optional clause appended to it.
 	Query KibanaHTTPAPIsAlertingRuleQuery `json:"query"`
 
-	// Recovery When an alert episode recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.
+	// Recovery When an alert recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.
 	Recovery *KibanaHTTPAPIsAlertingRuleRecovery `json:"recovery,omitempty"`
 
 	// Schedule Execution schedule configuration.
@@ -37277,7 +37298,7 @@ type KibanaHTTPAPIsAlertingNewRuleKind string
 
 // KibanaHTTPAPIsAlertingNewTagEpisodeAction defines model for Kibana_HTTP_APIs_alerting_new_tag_episode_action.
 type KibanaHTTPAPIsAlertingNewTagEpisodeAction struct {
-	// Tags Replaces the episode's tags. Send `[]` to clear.
+	// Tags Replaces the alert's tags. Send `[]` to clear.
 	Tags []string `json:"tags"`
 }
 
@@ -37289,10 +37310,10 @@ type KibanaHTTPAPIsAlertingPolicyExecutionHistoryItem struct {
 	ActionGroupCount float32 `json:"action_group_count"`
 	AlertCount       float32 `json:"alert_count"`
 
-	// Alerts Alert ids referenced by this event, bounded to MAX_EMBEDDED_EPISODES_PER_ITEM. Use `alert_count` for the true total.
-	Alerts *[]struct {
+	// Alerts Alert IDs referenced by this event, bounded to 50. Empty when the event references no alerts. Use `alert_count` for the true total.
+	Alerts []struct {
 		Id string `json:"id"`
-	} `json:"alerts,omitempty"`
+	} `json:"alerts"`
 	DispatchedAt time.Time `json:"dispatched_at"`
 	Error        *struct {
 		Message    string  `json:"message"`
@@ -37305,15 +37326,15 @@ type KibanaHTTPAPIsAlertingPolicyExecutionHistoryItem struct {
 		Name *string `json:"name,omitempty"`
 	} `json:"policy"`
 
-	// Rules Rules referenced by this event, bounded to MAX_EMBEDDED_RULES_PER_ITEM. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use `total_rule_count` for the full count.
+	// RuleCount Number of rules referenced by this event after search or rule-filter narrowing. Unlike `total` on a list response, this is an exact count and it can exceed `rules.length` when the embedded array is truncated to the cap.
+	RuleCount float32 `json:"rule_count"`
+
+	// Rules Rules referenced by this event, bounded to 20. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use `rule_count` for the full count.
 	Rules []struct {
 		Id   string  `json:"id"`
 		Name *string `json:"name,omitempty"`
 	} `json:"rules"`
-
-	// TotalRuleCount Total number of rules referenced by this event after search / rule-filter narrowing. May exceed `rules.length` when the embedded array is truncated to the cap.
-	TotalRuleCount float32 `json:"total_rule_count"`
-	Workflows      []struct {
+	Workflows []struct {
 		Id   string  `json:"id"`
 		Name *string `json:"name,omitempty"`
 	} `json:"workflows"`
@@ -37361,7 +37382,7 @@ type KibanaHTTPAPIsAlertingPutActionPolicy struct {
 	// GroupBy The fields used to group alerts.
 	GroupBy *[]string `json:"group_by,omitempty"`
 
-	// GroupingMode The grouping mode: per_episode groups by episode lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.
+	// GroupingMode The grouping mode: per_alert groups by alert lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.
 	GroupingMode *KibanaHTTPAPIsAlertingActionPolicyGroupingMode `json:"grouping_mode,omitempty"`
 
 	// Matcher Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts.
@@ -37475,7 +37496,7 @@ type KibanaHTTPAPIsAlertingRuleNoData struct {
 	union json.RawMessage
 }
 
-// KibanaHTTPAPIsAlertingRuleNoDataAlert Marks an existing alert episode `active` when the rule finds no data. It never opens an episode for a group that has not breached. Not accepted when creating or updating rules.
+// KibanaHTTPAPIsAlertingRuleNoDataAlert Marks an existing alert `active` when the rule finds no data. It never opens an alert for a group that has not breached. Not accepted when creating or updating rules.
 type KibanaHTTPAPIsAlertingRuleNoDataAlert struct {
 	// Query Optional ES|QL query that checks whether a group has data. If omitted, `query.base` is used, which then has to be a presence query in its own right — so `query.breach` is required.
 	Query    *string                                       `json:"query,omitempty"`
@@ -37493,7 +37514,7 @@ type KibanaHTTPAPIsAlertingRuleNoDataIgnore struct {
 // KibanaHTTPAPIsAlertingRuleNoDataIgnoreStrategy defines model for KibanaHTTPAPIsAlertingRuleNoDataIgnore.Strategy.
 type KibanaHTTPAPIsAlertingRuleNoDataIgnoreStrategy string
 
-// KibanaHTTPAPIsAlertingRuleNoDataKeepLast Holds the alert episode's current status when the rule finds no data.
+// KibanaHTTPAPIsAlertingRuleNoDataKeepLast Holds the alert's current status when the rule finds no data.
 type KibanaHTTPAPIsAlertingRuleNoDataKeepLast struct {
 	// Query Optional ES|QL query that checks whether a group has data. If omitted, `query.base` is used, which then has to be a presence query in its own right — so `query.breach` is required.
 	Query    *string                                          `json:"query,omitempty"`
@@ -37503,7 +37524,7 @@ type KibanaHTTPAPIsAlertingRuleNoDataKeepLast struct {
 // KibanaHTTPAPIsAlertingRuleNoDataKeepLastStrategy defines model for KibanaHTTPAPIsAlertingRuleNoDataKeepLast.Strategy.
 type KibanaHTTPAPIsAlertingRuleNoDataKeepLastStrategy string
 
-// KibanaHTTPAPIsAlertingRuleNoDataResolve Closes the alert episode the first time the rule finds no data for a group.
+// KibanaHTTPAPIsAlertingRuleNoDataResolve Closes the alert the first time the rule finds no data for a group.
 type KibanaHTTPAPIsAlertingRuleNoDataResolve struct {
 	// Query Optional ES|QL query that checks whether a group has data. If omitted, `query.base` is used, which then has to be a presence query in its own right — so `query.breach` is required.
 	Query    *string                                         `json:"query,omitempty"`
@@ -37522,12 +37543,12 @@ type KibanaHTTPAPIsAlertingRuleQuery struct {
 	Breach *KibanaHTTPAPIsAlertingRuleBreach `json:"breach,omitempty"`
 }
 
-// KibanaHTTPAPIsAlertingRuleRecovery When an alert episode recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.
+// KibanaHTTPAPIsAlertingRuleRecovery When an alert recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.
 type KibanaHTTPAPIsAlertingRuleRecovery struct {
 	union json.RawMessage
 }
 
-// KibanaHTTPAPIsAlertingRuleRecoveryCondition Recovers the alert episode when `query.base` plus `segment` returns the group. Requires `query.breach`.
+// KibanaHTTPAPIsAlertingRuleRecoveryCondition Recovers the alert when `query.base` plus `segment` returns the group. Requires `query.breach`.
 type KibanaHTTPAPIsAlertingRuleRecoveryCondition struct {
 	// Segment ES|QL clause appended to `query.base`, for example `WHERE avg_cpu < 0.60`. Don't include a `FROM` clause.
 	Segment  string                                              `json:"segment"`
@@ -37537,7 +37558,7 @@ type KibanaHTTPAPIsAlertingRuleRecoveryCondition struct {
 // KibanaHTTPAPIsAlertingRuleRecoveryConditionStrategy defines model for KibanaHTTPAPIsAlertingRuleRecoveryCondition.Strategy.
 type KibanaHTTPAPIsAlertingRuleRecoveryConditionStrategy string
 
-// KibanaHTTPAPIsAlertingRuleRecoveryManual Does not recover automatically. Close the alert episode with a user action. `state_transition.recovering` has no effect.
+// KibanaHTTPAPIsAlertingRuleRecoveryManual Does not recover automatically. Close the alert with a user action. `state_transition.recovering` has no effect.
 type KibanaHTTPAPIsAlertingRuleRecoveryManual struct {
 	Strategy KibanaHTTPAPIsAlertingRuleRecoveryManualStrategy `json:"strategy"`
 }
@@ -37545,7 +37566,7 @@ type KibanaHTTPAPIsAlertingRuleRecoveryManual struct {
 // KibanaHTTPAPIsAlertingRuleRecoveryManualStrategy defines model for KibanaHTTPAPIsAlertingRuleRecoveryManual.Strategy.
 type KibanaHTTPAPIsAlertingRuleRecoveryManualStrategy string
 
-// KibanaHTTPAPIsAlertingRuleRecoveryNoBreach Recovers the alert episode when its group no longer appears in the breach results.
+// KibanaHTTPAPIsAlertingRuleRecoveryNoBreach Recovers the alert when its group no longer appears in the breach results.
 type KibanaHTTPAPIsAlertingRuleRecoveryNoBreach struct {
 	Strategy KibanaHTTPAPIsAlertingRuleRecoveryNoBreachStrategy `json:"strategy"`
 }
@@ -37553,9 +37574,9 @@ type KibanaHTTPAPIsAlertingRuleRecoveryNoBreach struct {
 // KibanaHTTPAPIsAlertingRuleRecoveryNoBreachStrategy defines model for KibanaHTTPAPIsAlertingRuleRecoveryNoBreach.Strategy.
 type KibanaHTTPAPIsAlertingRuleRecoveryNoBreachStrategy string
 
-// KibanaHTTPAPIsAlertingRuleRecoveryQuery Recovers the alert episode when this separate query returns the group.
+// KibanaHTTPAPIsAlertingRuleRecoveryQuery Recovers the alert when this separate query returns the group.
 type KibanaHTTPAPIsAlertingRuleRecoveryQuery struct {
-	// Query Independent ES|QL query, including its own `FROM` clause. A matching group recovers the alert episode.
+	// Query Independent ES|QL query, including its own `FROM` clause. A matching group recovers the alert.
 	Query    string                                          `json:"query"`
 	Strategy KibanaHTTPAPIsAlertingRuleRecoveryQueryStrategy `json:"strategy"`
 }
@@ -37595,13 +37616,13 @@ type KibanaHTTPAPIsAlertingRuleResponse struct {
 	// Query ES|QL query the rule evaluates. `base` is required. `breach` is an optional clause appended to it.
 	Query KibanaHTTPAPIsAlertingRuleQuery `json:"query"`
 
-	// Recovery When an alert episode recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.
+	// Recovery When an alert recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.
 	Recovery *KibanaHTTPAPIsAlertingRuleRecovery `json:"recovery,omitempty"`
 
 	// Schedule Execution schedule configuration.
 	Schedule KibanaHTTPAPIsAlertingRuleSchedule `json:"schedule"`
 
-	// StateTransition Specifies how many consecutive matches, or how long a condition must hold, before an alert episode becomes `active` or `inactive`. Allowed only when `kind` is `alert`.
+	// StateTransition Specifies how many consecutive matches, or how long a condition must hold, before an alert becomes `active` or `inactive`. Allowed only when `kind` is `alert`.
 	StateTransition *KibanaHTTPAPIsAlertingRuleStateTransition `json:"state_transition,omitempty"`
 
 	// TimeField Document field Kibana uses with `schedule.lookback` to time-filter `query.base`.
@@ -37629,7 +37650,7 @@ type KibanaHTTPAPIsAlertingRuleSchedule struct {
 	Lookback *string `json:"lookback,omitempty"`
 }
 
-// KibanaHTTPAPIsAlertingRuleStateTransition Specifies how many consecutive matches, or how long a condition must hold, before an alert episode becomes `active` or `inactive`. Allowed only when `kind` is `alert`.
+// KibanaHTTPAPIsAlertingRuleStateTransition Specifies how many consecutive matches, or how long a condition must hold, before an alert becomes `active` or `inactive`. Allowed only when `kind` is `alert`.
 type KibanaHTTPAPIsAlertingRuleStateTransition struct {
 	Pending    *KibanaHTTPAPIsAlertingRuleStateTransitionPending    `json:"pending,omitempty"`
 	Recovering *KibanaHTTPAPIsAlertingRuleStateTransitionRecovering `json:"recovering,omitempty"`
@@ -37637,7 +37658,7 @@ type KibanaHTTPAPIsAlertingRuleStateTransition struct {
 
 // KibanaHTTPAPIsAlertingRuleStateTransitionPending defines model for Kibana_HTTP_APIs_alerting_rule_state_transition_pending.
 type KibanaHTTPAPIsAlertingRuleStateTransitionPending struct {
-	// Count Consecutive matches the alert episode spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match.
+	// Count Consecutive matches the alert spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match.
 	Count *int `json:"count,omitempty"`
 
 	// Operator When both `count` and `timeframe` are set, `and` requires both and `or` requires either. Allowed only when both fields are present.
@@ -37652,7 +37673,7 @@ type KibanaHTTPAPIsAlertingRuleStateTransitionPendingOperator string
 
 // KibanaHTTPAPIsAlertingRuleStateTransitionRecovering defines model for Kibana_HTTP_APIs_alerting_rule_state_transition_recovering.
 type KibanaHTTPAPIsAlertingRuleStateTransitionRecovering struct {
-	// Count Consecutive recoveries the alert episode spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery.
+	// Count Consecutive recoveries the alert spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery.
 	Count *int `json:"count,omitempty"`
 
 	// Operator When both `count` and `timeframe` are set, `and` requires both and `or` requires either. Allowed only when both fields are present.
@@ -37723,7 +37744,7 @@ type KibanaHTTPAPIsAlertingUpdateRule struct {
 	// Query ES|QL query the rule evaluates. `base` is required. `breach` is an optional clause appended to it.
 	Query *KibanaHTTPAPIsAlertingRuleQuery `json:"query,omitempty"`
 
-	// Recovery When an alert episode recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.
+	// Recovery When an alert recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.
 	Recovery *KibanaHTTPAPIsAlertingRuleRecovery `json:"recovery,omitempty"`
 	Schedule *struct {
 		// Every Execution interval, e.g. 1m, 5m, 1h.
@@ -41986,7 +42007,7 @@ type KibanaHTTPAPIsKbnDashboardPanelTypeDiscoverSessionConfig0Tabs0 struct {
 	// RowHeight Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".
 	RowHeight *KibanaHTTPAPIsKbnDashboardPanelTypeDiscoverSession_Config_0_Tabs_0_RowHeight `json:"row_height,omitempty"`
 
-	// RowsPerPage The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
+	// RowsPerPage The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage". Has no effect on ES|QL tabs since Kibana 8.16.
 	RowsPerPage *float32 `json:"rows_per_page,omitempty"`
 
 	// SampleSize Discover display option: controls how many documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".
@@ -42085,7 +42106,7 @@ type KibanaHTTPAPIsKbnDashboardPanelTypeDiscoverSessionConfig0Tabs1 struct {
 	// RowHeight Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".
 	RowHeight *KibanaHTTPAPIsKbnDashboardPanelTypeDiscoverSession_Config_0_Tabs_1_RowHeight `json:"row_height,omitempty"`
 
-	// RowsPerPage The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
+	// RowsPerPage The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage". Has no effect on ES|QL tabs since Kibana 8.16.
 	RowsPerPage *float32 `json:"rows_per_page,omitempty"`
 
 	// SampleSize Discover display option: controls how many documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".
@@ -42185,7 +42206,7 @@ type KibanaHTTPAPIsKbnDashboardPanelTypeDiscoverSessionConfig0Tabs2 struct {
 	// RowHeight Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".
 	RowHeight *KibanaHTTPAPIsKbnDashboardPanelTypeDiscoverSession_Config_0_Tabs_2_RowHeight `json:"row_height,omitempty"`
 
-	// RowsPerPage The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
+	// RowsPerPage The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage". Has no effect on ES|QL tabs since Kibana 8.16.
 	RowsPerPage *float32 `json:"rows_per_page,omitempty"`
 
 	// SampleSize Discover display option: controls how many documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".
@@ -75755,6 +75776,83 @@ type SyntheticsDeleteParameterResult = []struct {
 	Id      *string `json:"id,omitempty"`
 }
 
+// SyntheticsApiMonitorFields defines model for Synthetics_apiMonitorFields.
+type SyntheticsApiMonitorFields struct {
+	Alert *SyntheticsMonitorAlert `json:"alert,omitempty"`
+
+	// CertificateErrorSpkiAllowlist PEM certificates whose public keys (SPKI) are allowlisted so the API request context bypasses certificate errors for matching presented certificates. This does not add a CA to the trust store.
+	CertificateErrorSpkiAllowlist *[]string `json:"certificate_error_spki_allowlist,omitempty"`
+
+	// Enabled Specify whether the monitor is enabled.
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// IgnoreHttpsErrors Ignore HTTPS errors.
+	IgnoreHttpsErrors *bool `json:"ignore_https_errors,omitempty"`
+
+	// InlineScript The inline API Journey script.
+	InlineScript string `json:"inline_script"`
+
+	// Labels Key-value pairs of labels to associate with the monitor. Labels can be used for filtering and grouping monitors.
+	Labels *map[string]string `json:"labels,omitempty"`
+
+	// Locations The location to deploy the monitor.
+	// Monitors can be deployed in multiple locations so that you can detect differences in availability and response times across those locations.
+	// To list available locations you can:
+	//
+	// - Run the `elastic-synthetics locations` command with the deployment's Kibana URL.
+	// - Go to *Synthetics > Management* and click *Create monitor*. Locations will be listed in *Locations*.
+	Locations *[]string `json:"locations,omitempty"`
+
+	// Name The monitor name.
+	Name string `json:"name"`
+
+	// Namespace The namespace field should be lowercase and not contain spaces. The namespace must not include any of the following characters: `*`, `\`, `/`, `?`, `"`, `<`, `>`, `|`, whitespace, `,`, `#`, `:`, or `-`.
+	Namespace *string                 `json:"namespace,omitempty"`
+	Params    *map[string]interface{} `json:"params,omitempty"`
+
+	// PlaywrightOptions Playwright API request context options.
+	PlaywrightOptions *map[string]interface{} `json:"playwright_options,omitempty"`
+
+	// PrivateLocations The private locations to which the monitors will be deployed.
+	// These private locations refer to locations hosted and managed by you, whereas `locations` are hosted by Elastic.
+	// You can specify a private location using the location's name.
+	// To list available private locations you can:
+	//
+	// - Run the `elastic-synthetics locations` command with the deployment's Kibana URL.
+	// - Go to *Synthetics > Settings* and click *Private locationsr*. Private locations will be listed in the table.
+	//
+	// > info
+	// > You can provide `locations` or `private_locations` or both. At least one is required.
+	PrivateLocations *[]string `json:"private_locations,omitempty"`
+
+	// RetestOnFailure Turn retesting for when a monitor fails on or off. By default, monitors are automatically retested if the monitor goes from "up" to "down". If the result of the retest is also "down", an error will be created and if configured, an alert sent. The monitor will then resume running according to the defined schedule. Using `retest_on_failure` can reduce noise related to transient problems.
+	RetestOnFailure *bool `json:"retest_on_failure,omitempty"`
+
+	// Schedule The monitor's schedule in minutes. Supported values are `1`, `3`, `5`, `10`, `15`, `30`, `60`, `120`, and `240`. The default value is `3` minutes for HTTP, TCP, and ICMP monitors. The default value is `10` minutes for Browser monitors.
+	Schedule *float32 `json:"schedule,omitempty"`
+
+	// ServiceName The APM service name.
+	ServiceName *string `json:"service.name,omitempty"`
+
+	// SyntheticsArgs Synthetics agent CLI arguments.
+	SyntheticsArgs *[]string `json:"synthetics_args,omitempty"`
+
+	// Tags An array of tags.
+	Tags *[]string `json:"tags,omitempty"`
+
+	// Timeout The monitor timeout in seconds. The monitor will fail if it doesn't complete within this time.
+	//
+	// For browser monitors, the minimum timeout is 30 seconds. Browser monitor timeouts are only applied when the monitor runs on private locations. If a browser monitor specifies a timeout but has no private locations configured, the timeout will have no effect and a warning will be returned in the response.
+	Timeout *float32 `json:"timeout,omitempty"`
+
+	// Type The monitor type.
+	Type                 SyntheticsApiMonitorFieldsType `json:"type"`
+	AdditionalProperties map[string]interface{}         `json:"-"`
+}
+
+// SyntheticsApiMonitorFieldsType The monitor type.
+type SyntheticsApiMonitorFieldsType string
+
 // SyntheticsBrowserMonitorFields defines model for Synthetics_browserMonitorFields.
 type SyntheticsBrowserMonitorFields struct {
 	Alert *SyntheticsMonitorAlert `json:"alert,omitempty"`
@@ -79453,7 +79551,7 @@ type GetAlertingV2ExecutionHistoryActionPoliciesParams struct {
 	// Page Page number (1-indexed). Defaults to 1.
 	Page int `form:"page" json:"page"`
 
-	// PerPage Number of events per page. Defaults to 20. Pass 0 for a count-only read.
+	// PerPage Number of events per page. Defaults to 20.
 	PerPage int `form:"per_page" json:"per_page"`
 
 	// From Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of alert_ids — e.g. set it to an alert’s start time to scope results to that alert’s lifetime.
@@ -79462,7 +79560,7 @@ type GetAlertingV2ExecutionHistoryActionPoliciesParams struct {
 	// To Inclusive ISO datetime upper bound on the event timestamp.
 	To *time.Time `form:"to,omitempty" json:"to,omitempty"`
 
-	// AlertIds Alert filter. Narrows events to those referencing at least one of the provided alert ids.
+	// AlertIds Alert filter. Narrows events to those referencing at least one of the provided alert IDs.
 	AlertIds *[]string `form:"alert_ids,omitempty" json:"alert_ids,omitempty"`
 
 	// SortField Sort field. Defaults to "dispatched_at".
@@ -79474,7 +79572,7 @@ type GetAlertingV2ExecutionHistoryActionPoliciesParams struct {
 	// Search Free-text search. Matches policy name, rule name, policy/rule ID (case-insensitive).
 	Search *string `form:"search,omitempty" json:"search,omitempty"`
 
-	// RuleIds Explicit rule filter. Narrows events to those referencing at least one of the provided rule ids. Also unions with the search filter if both are provided.
+	// RuleIds Explicit rule filter. Narrows events to those referencing at least one of the provided rule IDs. Also unions with the search filter if both are provided.
 	RuleIds *[]string `form:"rule_ids,omitempty" json:"rule_ids,omitempty"`
 
 	// Outcomes Outcome filter. When omitted matches all outcomes. Pass one or more of "success", "throttled", "failure" to narrow.
@@ -79513,7 +79611,7 @@ type GetAlertingV2ExecutionHistoryRulesParams struct {
 	// Page Page number.
 	Page int `form:"page" json:"page"`
 
-	// PerPage Number of results per page. Pass 0 for a count-only read.
+	// PerPage Number of results per page.
 	PerPage int `form:"per_page" json:"per_page"`
 }
 
@@ -80287,6 +80385,18 @@ type FindCaseActivityDefaultSpaceParamsSortOrder string
 
 // FindCaseActivityDefaultSpaceParamsTypes defines parameters for FindCaseActivityDefaultSpace.
 type FindCaseActivityDefaultSpaceParamsTypes string
+
+// PostChatMessageJSONBody defines parameters for PostChatMessage.
+type PostChatMessageJSONBody struct {
+	// AgentId The ID of the agent to send the message to. Defaults to the default Elastic AI agent.
+	AgentId *string `json:"agent_id,omitempty"`
+
+	// ConversationId The ID of an existing conversation to continue. Omit it to start a new conversation; the response carries the ID to reuse on the next call.
+	ConversationId *string `json:"conversation_id,omitempty"`
+
+	// Message The user message to send to the agent.
+	Message string `json:"message"`
+}
 
 // GetContextEngineAiIndex200JSONResponseBodyAiIndicesAutomationsType defines parameters for GetContextEngineAiIndex.
 type GetContextEngineAiIndex200JSONResponseBodyAiIndicesAutomationsType string
@@ -91154,6 +91264,17 @@ type GetSyntheticMonitorsParamsTags1 = []string
 // GetSyntheticMonitorsParamsUseLogicalAndFor defines parameters for GetSyntheticMonitors.
 type GetSyntheticMonitorsParamsUseLogicalAndFor string
 
+// PostSyntheticMonitorsBulkCreateJSONBody defines parameters for PostSyntheticMonitorsBulkCreate.
+type PostSyntheticMonitorsBulkCreateJSONBody struct {
+	// Monitors A non-empty list of monitor configurations, up to 1000 monitors.
+	Monitors []PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item `json:"monitors"`
+}
+
+// PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item defines parameters for PostSyntheticMonitorsBulkCreate.
+type PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item struct {
+	union json.RawMessage
+}
+
 // DeleteSyntheticMonitorsJSONBody defines parameters for DeleteSyntheticMonitors.
 type DeleteSyntheticMonitorsJSONBody struct {
 	// Ids An array of monitor IDs to delete.
@@ -92502,23 +92623,23 @@ type PostAlertingV2AlertsBulkTagJSONRequestBody = KibanaHTTPAPIsAlertingBulkTagE
 // PostAlertingV2AlertsBulkUnackJSONRequestBody defines body for PostAlertingV2AlertsBulkUnack for application/json ContentType.
 type PostAlertingV2AlertsBulkUnackJSONRequestBody = KibanaHTTPAPIsAlertingBulkUnackEpisodesRequest
 
-// PostAlertingV2AlertsAlertIdAckJSONRequestBody defines body for PostAlertingV2AlertsAlertIdAck for application/json ContentType.
-type PostAlertingV2AlertsAlertIdAckJSONRequestBody = KibanaHTTPAPIsAlertingNewAckEpisodeAction
+// PostAlertingV2AlertsIdAckJSONRequestBody defines body for PostAlertingV2AlertsIdAck for application/json ContentType.
+type PostAlertingV2AlertsIdAckJSONRequestBody = KibanaHTTPAPIsAlertingNewAckEpisodeAction
 
-// PostAlertingV2AlertsAlertIdActivateJSONRequestBody defines body for PostAlertingV2AlertsAlertIdActivate for application/json ContentType.
-type PostAlertingV2AlertsAlertIdActivateJSONRequestBody = KibanaHTTPAPIsAlertingNewActivateEpisodeAction
+// PostAlertingV2AlertsIdActivateJSONRequestBody defines body for PostAlertingV2AlertsIdActivate for application/json ContentType.
+type PostAlertingV2AlertsIdActivateJSONRequestBody = KibanaHTTPAPIsAlertingNewActivateEpisodeAction
 
-// PostAlertingV2AlertsAlertIdAssignJSONRequestBody defines body for PostAlertingV2AlertsAlertIdAssign for application/json ContentType.
-type PostAlertingV2AlertsAlertIdAssignJSONRequestBody = KibanaHTTPAPIsAlertingNewAssignEpisodeAction
+// PostAlertingV2AlertsIdAssignJSONRequestBody defines body for PostAlertingV2AlertsIdAssign for application/json ContentType.
+type PostAlertingV2AlertsIdAssignJSONRequestBody = KibanaHTTPAPIsAlertingNewAssignEpisodeAction
 
-// PostAlertingV2AlertsAlertIdDeactivateJSONRequestBody defines body for PostAlertingV2AlertsAlertIdDeactivate for application/json ContentType.
-type PostAlertingV2AlertsAlertIdDeactivateJSONRequestBody = KibanaHTTPAPIsAlertingNewDeactivateEpisodeAction
+// PostAlertingV2AlertsIdDeactivateJSONRequestBody defines body for PostAlertingV2AlertsIdDeactivate for application/json ContentType.
+type PostAlertingV2AlertsIdDeactivateJSONRequestBody = KibanaHTTPAPIsAlertingNewDeactivateEpisodeAction
 
-// PostAlertingV2AlertsAlertIdTagJSONRequestBody defines body for PostAlertingV2AlertsAlertIdTag for application/json ContentType.
-type PostAlertingV2AlertsAlertIdTagJSONRequestBody = KibanaHTTPAPIsAlertingNewTagEpisodeAction
+// PostAlertingV2AlertsIdTagJSONRequestBody defines body for PostAlertingV2AlertsIdTag for application/json ContentType.
+type PostAlertingV2AlertsIdTagJSONRequestBody = KibanaHTTPAPIsAlertingNewTagEpisodeAction
 
-// PostAlertingV2AlertsAlertIdUnackJSONRequestBody defines body for PostAlertingV2AlertsAlertIdUnack for application/json ContentType.
-type PostAlertingV2AlertsAlertIdUnackJSONRequestBody = KibanaHTTPAPIsAlertingNewUnackEpisodeAction
+// PostAlertingV2AlertsIdUnackJSONRequestBody defines body for PostAlertingV2AlertsIdUnack for application/json ContentType.
+type PostAlertingV2AlertsIdUnackJSONRequestBody = KibanaHTTPAPIsAlertingNewUnackEpisodeAction
 
 // PostAlertingV2RulesJSONRequestBody defines body for PostAlertingV2Rules for application/json ContentType.
 type PostAlertingV2RulesJSONRequestBody = KibanaHTTPAPIsAlertingNewRule
@@ -92642,6 +92763,9 @@ type PushCaseDefaultSpaceJSONRequestBody = PushCaseDefaultSpaceJSONBody
 
 // AddCaseFileDefaultSpaceMultipartRequestBody defines body for AddCaseFileDefaultSpace for multipart/form-data ContentType.
 type AddCaseFileDefaultSpaceMultipartRequestBody = CasesAddCaseFileRequest
+
+// PostChatMessageJSONRequestBody defines body for PostChatMessage for application/json ContentType.
+type PostChatMessageJSONRequestBody PostChatMessageJSONBody
 
 // PostContextEngineAiIndexJSONRequestBody defines body for PostContextEngineAiIndex for application/json ContentType.
 type PostContextEngineAiIndexJSONRequestBody PostContextEngineAiIndexJSONBody
@@ -93281,6 +93405,9 @@ type PutStreamsStreamnameAttachmentsAttachmenttypeAttachmentidJSONRequestBody Pu
 
 // PostSyntheticMonitorsJSONRequestBody defines body for PostSyntheticMonitors for application/json ContentType.
 type PostSyntheticMonitorsJSONRequestBody = SyntheticsMonitorRequest
+
+// PostSyntheticMonitorsBulkCreateJSONRequestBody defines body for PostSyntheticMonitorsBulkCreate for application/json ContentType.
+type PostSyntheticMonitorsBulkCreateJSONRequestBody PostSyntheticMonitorsBulkCreateJSONBody
 
 // DeleteSyntheticMonitorsJSONRequestBody defines body for DeleteSyntheticMonitors for application/json ContentType.
 type DeleteSyntheticMonitorsJSONRequestBody DeleteSyntheticMonitorsJSONBody
@@ -109029,6 +109156,338 @@ func (a KibanaHTTPAPIsUpdatePackageRequest_NamespaceCustomizationSettings_Additi
 		if err != nil {
 			return nil, fmt.Errorf("error marshaling 'ilm_policy': %w", err)
 		}
+	}
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for SyntheticsApiMonitorFields. Returns the specified
+// element and whether it was found
+func (a SyntheticsApiMonitorFields) Get(fieldName string) (value interface{}, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for SyntheticsApiMonitorFields
+func (a *SyntheticsApiMonitorFields) Set(fieldName string, value interface{}) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]interface{})
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for SyntheticsApiMonitorFields to handle AdditionalProperties
+func (a *SyntheticsApiMonitorFields) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if raw, found := object["alert"]; found {
+		err = json.Unmarshal(raw, &a.Alert)
+		if err != nil {
+			return fmt.Errorf("error reading 'alert': %w", err)
+		}
+		delete(object, "alert")
+	}
+
+	if raw, found := object["certificate_error_spki_allowlist"]; found {
+		err = json.Unmarshal(raw, &a.CertificateErrorSpkiAllowlist)
+		if err != nil {
+			return fmt.Errorf("error reading 'certificate_error_spki_allowlist': %w", err)
+		}
+		delete(object, "certificate_error_spki_allowlist")
+	}
+
+	if raw, found := object["enabled"]; found {
+		err = json.Unmarshal(raw, &a.Enabled)
+		if err != nil {
+			return fmt.Errorf("error reading 'enabled': %w", err)
+		}
+		delete(object, "enabled")
+	}
+
+	if raw, found := object["ignore_https_errors"]; found {
+		err = json.Unmarshal(raw, &a.IgnoreHttpsErrors)
+		if err != nil {
+			return fmt.Errorf("error reading 'ignore_https_errors': %w", err)
+		}
+		delete(object, "ignore_https_errors")
+	}
+
+	if raw, found := object["inline_script"]; found {
+		err = json.Unmarshal(raw, &a.InlineScript)
+		if err != nil {
+			return fmt.Errorf("error reading 'inline_script': %w", err)
+		}
+		delete(object, "inline_script")
+	}
+
+	if raw, found := object["labels"]; found {
+		err = json.Unmarshal(raw, &a.Labels)
+		if err != nil {
+			return fmt.Errorf("error reading 'labels': %w", err)
+		}
+		delete(object, "labels")
+	}
+
+	if raw, found := object["locations"]; found {
+		err = json.Unmarshal(raw, &a.Locations)
+		if err != nil {
+			return fmt.Errorf("error reading 'locations': %w", err)
+		}
+		delete(object, "locations")
+	}
+
+	if raw, found := object["name"]; found {
+		err = json.Unmarshal(raw, &a.Name)
+		if err != nil {
+			return fmt.Errorf("error reading 'name': %w", err)
+		}
+		delete(object, "name")
+	}
+
+	if raw, found := object["namespace"]; found {
+		err = json.Unmarshal(raw, &a.Namespace)
+		if err != nil {
+			return fmt.Errorf("error reading 'namespace': %w", err)
+		}
+		delete(object, "namespace")
+	}
+
+	if raw, found := object["params"]; found {
+		err = json.Unmarshal(raw, &a.Params)
+		if err != nil {
+			return fmt.Errorf("error reading 'params': %w", err)
+		}
+		delete(object, "params")
+	}
+
+	if raw, found := object["playwright_options"]; found {
+		err = json.Unmarshal(raw, &a.PlaywrightOptions)
+		if err != nil {
+			return fmt.Errorf("error reading 'playwright_options': %w", err)
+		}
+		delete(object, "playwright_options")
+	}
+
+	if raw, found := object["private_locations"]; found {
+		err = json.Unmarshal(raw, &a.PrivateLocations)
+		if err != nil {
+			return fmt.Errorf("error reading 'private_locations': %w", err)
+		}
+		delete(object, "private_locations")
+	}
+
+	if raw, found := object["retest_on_failure"]; found {
+		err = json.Unmarshal(raw, &a.RetestOnFailure)
+		if err != nil {
+			return fmt.Errorf("error reading 'retest_on_failure': %w", err)
+		}
+		delete(object, "retest_on_failure")
+	}
+
+	if raw, found := object["schedule"]; found {
+		err = json.Unmarshal(raw, &a.Schedule)
+		if err != nil {
+			return fmt.Errorf("error reading 'schedule': %w", err)
+		}
+		delete(object, "schedule")
+	}
+
+	if raw, found := object["service.name"]; found {
+		err = json.Unmarshal(raw, &a.ServiceName)
+		if err != nil {
+			return fmt.Errorf("error reading 'service.name': %w", err)
+		}
+		delete(object, "service.name")
+	}
+
+	if raw, found := object["synthetics_args"]; found {
+		err = json.Unmarshal(raw, &a.SyntheticsArgs)
+		if err != nil {
+			return fmt.Errorf("error reading 'synthetics_args': %w", err)
+		}
+		delete(object, "synthetics_args")
+	}
+
+	if raw, found := object["tags"]; found {
+		err = json.Unmarshal(raw, &a.Tags)
+		if err != nil {
+			return fmt.Errorf("error reading 'tags': %w", err)
+		}
+		delete(object, "tags")
+	}
+
+	if raw, found := object["timeout"]; found {
+		err = json.Unmarshal(raw, &a.Timeout)
+		if err != nil {
+			return fmt.Errorf("error reading 'timeout': %w", err)
+		}
+		delete(object, "timeout")
+	}
+
+	if raw, found := object["type"]; found {
+		err = json.Unmarshal(raw, &a.Type)
+		if err != nil {
+			return fmt.Errorf("error reading 'type': %w", err)
+		}
+		delete(object, "type")
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]interface{})
+		for fieldName, fieldBuf := range object {
+			var fieldVal interface{}
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for SyntheticsApiMonitorFields to handle AdditionalProperties
+func (a SyntheticsApiMonitorFields) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	if a.Alert != nil {
+		object["alert"], err = json.Marshal(a.Alert)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'alert': %w", err)
+		}
+	}
+
+	if a.CertificateErrorSpkiAllowlist != nil {
+		object["certificate_error_spki_allowlist"], err = json.Marshal(a.CertificateErrorSpkiAllowlist)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'certificate_error_spki_allowlist': %w", err)
+		}
+	}
+
+	if a.Enabled != nil {
+		object["enabled"], err = json.Marshal(a.Enabled)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'enabled': %w", err)
+		}
+	}
+
+	if a.IgnoreHttpsErrors != nil {
+		object["ignore_https_errors"], err = json.Marshal(a.IgnoreHttpsErrors)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'ignore_https_errors': %w", err)
+		}
+	}
+
+	object["inline_script"], err = json.Marshal(a.InlineScript)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling 'inline_script': %w", err)
+	}
+
+	if a.Labels != nil {
+		object["labels"], err = json.Marshal(a.Labels)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'labels': %w", err)
+		}
+	}
+
+	if a.Locations != nil {
+		object["locations"], err = json.Marshal(a.Locations)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'locations': %w", err)
+		}
+	}
+
+	object["name"], err = json.Marshal(a.Name)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling 'name': %w", err)
+	}
+
+	if a.Namespace != nil {
+		object["namespace"], err = json.Marshal(a.Namespace)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'namespace': %w", err)
+		}
+	}
+
+	if a.Params != nil {
+		object["params"], err = json.Marshal(a.Params)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'params': %w", err)
+		}
+	}
+
+	if a.PlaywrightOptions != nil {
+		object["playwright_options"], err = json.Marshal(a.PlaywrightOptions)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'playwright_options': %w", err)
+		}
+	}
+
+	if a.PrivateLocations != nil {
+		object["private_locations"], err = json.Marshal(a.PrivateLocations)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'private_locations': %w", err)
+		}
+	}
+
+	if a.RetestOnFailure != nil {
+		object["retest_on_failure"], err = json.Marshal(a.RetestOnFailure)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'retest_on_failure': %w", err)
+		}
+	}
+
+	if a.Schedule != nil {
+		object["schedule"], err = json.Marshal(a.Schedule)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'schedule': %w", err)
+		}
+	}
+
+	if a.ServiceName != nil {
+		object["service.name"], err = json.Marshal(a.ServiceName)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'service.name': %w", err)
+		}
+	}
+
+	if a.SyntheticsArgs != nil {
+		object["synthetics_args"], err = json.Marshal(a.SyntheticsArgs)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'synthetics_args': %w", err)
+		}
+	}
+
+	if a.Tags != nil {
+		object["tags"], err = json.Marshal(a.Tags)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'tags': %w", err)
+		}
+	}
+
+	if a.Timeout != nil {
+		object["timeout"], err = json.Marshal(a.Timeout)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'timeout': %w", err)
+		}
+	}
+
+	object["type"], err = json.Marshal(a.Type)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling 'type': %w", err)
 	}
 
 	for fieldName, field := range a.AdditionalProperties {
@@ -175173,6 +175632,185 @@ func (t *PutStreamsStreamnameAttachmentsAttachmenttypeAttachmentidJSONBody) Unma
 	return err
 }
 
+// AsSyntheticsBrowserMonitorFields returns the union data inside the PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item as a SyntheticsBrowserMonitorFields
+func (t PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item) AsSyntheticsBrowserMonitorFields() (SyntheticsBrowserMonitorFields, error) {
+	var body SyntheticsBrowserMonitorFields
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSyntheticsBrowserMonitorFields overwrites any union data inside the PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item as the provided SyntheticsBrowserMonitorFields
+func (t *PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item) FromSyntheticsBrowserMonitorFields(v SyntheticsBrowserMonitorFields) error {
+	v.Type = "Synthetics_browserMonitorFields"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSyntheticsBrowserMonitorFields performs a merge with any union data inside the PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item, using the provided SyntheticsBrowserMonitorFields
+func (t *PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item) MergeSyntheticsBrowserMonitorFields(v SyntheticsBrowserMonitorFields) error {
+	v.Type = "Synthetics_browserMonitorFields"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsSyntheticsHttpMonitorFields returns the union data inside the PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item as a SyntheticsHttpMonitorFields
+func (t PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item) AsSyntheticsHttpMonitorFields() (SyntheticsHttpMonitorFields, error) {
+	var body SyntheticsHttpMonitorFields
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSyntheticsHttpMonitorFields overwrites any union data inside the PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item as the provided SyntheticsHttpMonitorFields
+func (t *PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item) FromSyntheticsHttpMonitorFields(v SyntheticsHttpMonitorFields) error {
+	v.Type = "Synthetics_httpMonitorFields"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSyntheticsHttpMonitorFields performs a merge with any union data inside the PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item, using the provided SyntheticsHttpMonitorFields
+func (t *PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item) MergeSyntheticsHttpMonitorFields(v SyntheticsHttpMonitorFields) error {
+	v.Type = "Synthetics_httpMonitorFields"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsSyntheticsIcmpMonitorFields returns the union data inside the PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item as a SyntheticsIcmpMonitorFields
+func (t PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item) AsSyntheticsIcmpMonitorFields() (SyntheticsIcmpMonitorFields, error) {
+	var body SyntheticsIcmpMonitorFields
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSyntheticsIcmpMonitorFields overwrites any union data inside the PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item as the provided SyntheticsIcmpMonitorFields
+func (t *PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item) FromSyntheticsIcmpMonitorFields(v SyntheticsIcmpMonitorFields) error {
+	v.Type = "Synthetics_icmpMonitorFields"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSyntheticsIcmpMonitorFields performs a merge with any union data inside the PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item, using the provided SyntheticsIcmpMonitorFields
+func (t *PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item) MergeSyntheticsIcmpMonitorFields(v SyntheticsIcmpMonitorFields) error {
+	v.Type = "Synthetics_icmpMonitorFields"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsSyntheticsTcpMonitorFields returns the union data inside the PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item as a SyntheticsTcpMonitorFields
+func (t PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item) AsSyntheticsTcpMonitorFields() (SyntheticsTcpMonitorFields, error) {
+	var body SyntheticsTcpMonitorFields
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSyntheticsTcpMonitorFields overwrites any union data inside the PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item as the provided SyntheticsTcpMonitorFields
+func (t *PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item) FromSyntheticsTcpMonitorFields(v SyntheticsTcpMonitorFields) error {
+	v.Type = "Synthetics_tcpMonitorFields"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSyntheticsTcpMonitorFields performs a merge with any union data inside the PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item, using the provided SyntheticsTcpMonitorFields
+func (t *PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item) MergeSyntheticsTcpMonitorFields(v SyntheticsTcpMonitorFields) error {
+	v.Type = "Synthetics_tcpMonitorFields"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsSyntheticsApiMonitorFields returns the union data inside the PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item as a SyntheticsApiMonitorFields
+func (t PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item) AsSyntheticsApiMonitorFields() (SyntheticsApiMonitorFields, error) {
+	var body SyntheticsApiMonitorFields
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSyntheticsApiMonitorFields overwrites any union data inside the PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item as the provided SyntheticsApiMonitorFields
+func (t *PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item) FromSyntheticsApiMonitorFields(v SyntheticsApiMonitorFields) error {
+	v.Type = "Synthetics_apiMonitorFields"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSyntheticsApiMonitorFields performs a merge with any union data inside the PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item, using the provided SyntheticsApiMonitorFields
+func (t *PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item) MergeSyntheticsApiMonitorFields(v SyntheticsApiMonitorFields) error {
+	v.Type = "Synthetics_apiMonitorFields"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item) Discriminator() (string, error) {
+	var discriminator struct {
+		Discriminator string `json:"type"`
+	}
+	err := json.Unmarshal(t.union, &discriminator)
+	return discriminator.Discriminator, err
+}
+
+func (t PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item) ValueByDiscriminator() (interface{}, error) {
+	discriminator, err := t.Discriminator()
+	if err != nil {
+		return nil, err
+	}
+	switch discriminator {
+	case "Synthetics_apiMonitorFields":
+		return t.AsSyntheticsApiMonitorFields()
+	case "Synthetics_browserMonitorFields":
+		return t.AsSyntheticsBrowserMonitorFields()
+	case "Synthetics_httpMonitorFields":
+		return t.AsSyntheticsHttpMonitorFields()
+	case "Synthetics_icmpMonitorFields":
+		return t.AsSyntheticsIcmpMonitorFields()
+	case "Synthetics_tcpMonitorFields":
+		return t.AsSyntheticsTcpMonitorFields()
+	default:
+		return nil, errors.New("unknown discriminator value: " + discriminator)
+	}
+}
+
+func (t PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *PostSyntheticMonitorsBulkCreateJSONBody_Monitors_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
 // AsPostParametersJSONBody0 returns the union data inside the PostParametersJSONBody as a PostParametersJSONBody0
 func (t PostParametersJSONBody) AsPostParametersJSONBody0() (PostParametersJSONBody0, error) {
 	var body PostParametersJSONBody0
@@ -177351,35 +177989,35 @@ type ClientInterface interface {
 
 	PostAlertingV2AlertsBulkUnack(ctx context.Context, body PostAlertingV2AlertsBulkUnackJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostAlertingV2AlertsAlertIdAckWithBody request with any body
-	PostAlertingV2AlertsAlertIdAckWithBody(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PostAlertingV2AlertsIdAckWithBody request with any body
+	PostAlertingV2AlertsIdAckWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	PostAlertingV2AlertsAlertIdAck(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdAckJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PostAlertingV2AlertsIdAck(ctx context.Context, id string, body PostAlertingV2AlertsIdAckJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostAlertingV2AlertsAlertIdActivateWithBody request with any body
-	PostAlertingV2AlertsAlertIdActivateWithBody(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PostAlertingV2AlertsIdActivateWithBody request with any body
+	PostAlertingV2AlertsIdActivateWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	PostAlertingV2AlertsAlertIdActivate(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdActivateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PostAlertingV2AlertsIdActivate(ctx context.Context, id string, body PostAlertingV2AlertsIdActivateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostAlertingV2AlertsAlertIdAssignWithBody request with any body
-	PostAlertingV2AlertsAlertIdAssignWithBody(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PostAlertingV2AlertsIdAssignWithBody request with any body
+	PostAlertingV2AlertsIdAssignWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	PostAlertingV2AlertsAlertIdAssign(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdAssignJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PostAlertingV2AlertsIdAssign(ctx context.Context, id string, body PostAlertingV2AlertsIdAssignJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostAlertingV2AlertsAlertIdDeactivateWithBody request with any body
-	PostAlertingV2AlertsAlertIdDeactivateWithBody(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PostAlertingV2AlertsIdDeactivateWithBody request with any body
+	PostAlertingV2AlertsIdDeactivateWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	PostAlertingV2AlertsAlertIdDeactivate(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdDeactivateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PostAlertingV2AlertsIdDeactivate(ctx context.Context, id string, body PostAlertingV2AlertsIdDeactivateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostAlertingV2AlertsAlertIdTagWithBody request with any body
-	PostAlertingV2AlertsAlertIdTagWithBody(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PostAlertingV2AlertsIdTagWithBody request with any body
+	PostAlertingV2AlertsIdTagWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	PostAlertingV2AlertsAlertIdTag(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdTagJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PostAlertingV2AlertsIdTag(ctx context.Context, id string, body PostAlertingV2AlertsIdTagJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostAlertingV2AlertsAlertIdUnackWithBody request with any body
-	PostAlertingV2AlertsAlertIdUnackWithBody(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PostAlertingV2AlertsIdUnackWithBody request with any body
+	PostAlertingV2AlertsIdUnackWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	PostAlertingV2AlertsAlertIdUnack(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdUnackJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PostAlertingV2AlertsIdUnack(ctx context.Context, id string, body PostAlertingV2AlertsIdUnackJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetAlertingV2ExecutionHistoryActionPolicies request
 	GetAlertingV2ExecutionHistoryActionPolicies(ctx context.Context, params *GetAlertingV2ExecutionHistoryActionPoliciesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -177728,6 +178366,11 @@ type ClientInterface interface {
 
 	// FindCaseActivityDefaultSpace request
 	FindCaseActivityDefaultSpace(ctx context.Context, caseId CasesCaseId, params *FindCaseActivityDefaultSpaceParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostChatMessageWithBody request with any body
+	PostChatMessageWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostChatMessage(ctx context.Context, body PostChatMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetContextEngineAiIndex request
 	GetContextEngineAiIndex(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -179422,6 +180065,11 @@ type ClientInterface interface {
 	PostSyntheticMonitorsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	PostSyntheticMonitors(ctx context.Context, body PostSyntheticMonitorsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostSyntheticMonitorsBulkCreateWithBody request with any body
+	PostSyntheticMonitorsBulkCreateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostSyntheticMonitorsBulkCreate(ctx context.Context, body PostSyntheticMonitorsBulkCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// DeleteSyntheticMonitorsWithBody request with any body
 	DeleteSyntheticMonitorsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -181585,8 +182233,8 @@ func (c *Client) PostAlertingV2AlertsBulkUnack(ctx context.Context, body PostAle
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostAlertingV2AlertsAlertIdAckWithBody(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostAlertingV2AlertsAlertIdAckRequestWithBody(c.Server, alertId, contentType, body)
+func (c *Client) PostAlertingV2AlertsIdAckWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostAlertingV2AlertsIdAckRequestWithBody(c.Server, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -181597,8 +182245,8 @@ func (c *Client) PostAlertingV2AlertsAlertIdAckWithBody(ctx context.Context, ale
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostAlertingV2AlertsAlertIdAck(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdAckJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostAlertingV2AlertsAlertIdAckRequest(c.Server, alertId, body)
+func (c *Client) PostAlertingV2AlertsIdAck(ctx context.Context, id string, body PostAlertingV2AlertsIdAckJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostAlertingV2AlertsIdAckRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -181609,8 +182257,8 @@ func (c *Client) PostAlertingV2AlertsAlertIdAck(ctx context.Context, alertId str
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostAlertingV2AlertsAlertIdActivateWithBody(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostAlertingV2AlertsAlertIdActivateRequestWithBody(c.Server, alertId, contentType, body)
+func (c *Client) PostAlertingV2AlertsIdActivateWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostAlertingV2AlertsIdActivateRequestWithBody(c.Server, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -181621,8 +182269,8 @@ func (c *Client) PostAlertingV2AlertsAlertIdActivateWithBody(ctx context.Context
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostAlertingV2AlertsAlertIdActivate(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdActivateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostAlertingV2AlertsAlertIdActivateRequest(c.Server, alertId, body)
+func (c *Client) PostAlertingV2AlertsIdActivate(ctx context.Context, id string, body PostAlertingV2AlertsIdActivateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostAlertingV2AlertsIdActivateRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -181633,8 +182281,8 @@ func (c *Client) PostAlertingV2AlertsAlertIdActivate(ctx context.Context, alertI
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostAlertingV2AlertsAlertIdAssignWithBody(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostAlertingV2AlertsAlertIdAssignRequestWithBody(c.Server, alertId, contentType, body)
+func (c *Client) PostAlertingV2AlertsIdAssignWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostAlertingV2AlertsIdAssignRequestWithBody(c.Server, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -181645,8 +182293,8 @@ func (c *Client) PostAlertingV2AlertsAlertIdAssignWithBody(ctx context.Context, 
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostAlertingV2AlertsAlertIdAssign(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdAssignJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostAlertingV2AlertsAlertIdAssignRequest(c.Server, alertId, body)
+func (c *Client) PostAlertingV2AlertsIdAssign(ctx context.Context, id string, body PostAlertingV2AlertsIdAssignJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostAlertingV2AlertsIdAssignRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -181657,8 +182305,8 @@ func (c *Client) PostAlertingV2AlertsAlertIdAssign(ctx context.Context, alertId 
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostAlertingV2AlertsAlertIdDeactivateWithBody(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostAlertingV2AlertsAlertIdDeactivateRequestWithBody(c.Server, alertId, contentType, body)
+func (c *Client) PostAlertingV2AlertsIdDeactivateWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostAlertingV2AlertsIdDeactivateRequestWithBody(c.Server, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -181669,8 +182317,8 @@ func (c *Client) PostAlertingV2AlertsAlertIdDeactivateWithBody(ctx context.Conte
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostAlertingV2AlertsAlertIdDeactivate(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdDeactivateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostAlertingV2AlertsAlertIdDeactivateRequest(c.Server, alertId, body)
+func (c *Client) PostAlertingV2AlertsIdDeactivate(ctx context.Context, id string, body PostAlertingV2AlertsIdDeactivateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostAlertingV2AlertsIdDeactivateRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -181681,8 +182329,8 @@ func (c *Client) PostAlertingV2AlertsAlertIdDeactivate(ctx context.Context, aler
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostAlertingV2AlertsAlertIdTagWithBody(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostAlertingV2AlertsAlertIdTagRequestWithBody(c.Server, alertId, contentType, body)
+func (c *Client) PostAlertingV2AlertsIdTagWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostAlertingV2AlertsIdTagRequestWithBody(c.Server, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -181693,8 +182341,8 @@ func (c *Client) PostAlertingV2AlertsAlertIdTagWithBody(ctx context.Context, ale
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostAlertingV2AlertsAlertIdTag(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdTagJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostAlertingV2AlertsAlertIdTagRequest(c.Server, alertId, body)
+func (c *Client) PostAlertingV2AlertsIdTag(ctx context.Context, id string, body PostAlertingV2AlertsIdTagJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostAlertingV2AlertsIdTagRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -181705,8 +182353,8 @@ func (c *Client) PostAlertingV2AlertsAlertIdTag(ctx context.Context, alertId str
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostAlertingV2AlertsAlertIdUnackWithBody(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostAlertingV2AlertsAlertIdUnackRequestWithBody(c.Server, alertId, contentType, body)
+func (c *Client) PostAlertingV2AlertsIdUnackWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostAlertingV2AlertsIdUnackRequestWithBody(c.Server, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -181717,8 +182365,8 @@ func (c *Client) PostAlertingV2AlertsAlertIdUnackWithBody(ctx context.Context, a
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostAlertingV2AlertsAlertIdUnack(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdUnackJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostAlertingV2AlertsAlertIdUnackRequest(c.Server, alertId, body)
+func (c *Client) PostAlertingV2AlertsIdUnack(ctx context.Context, id string, body PostAlertingV2AlertsIdUnackJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostAlertingV2AlertsIdUnackRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -183267,6 +183915,30 @@ func (c *Client) AddCaseFileDefaultSpaceWithBody(ctx context.Context, caseId Cas
 
 func (c *Client) FindCaseActivityDefaultSpace(ctx context.Context, caseId CasesCaseId, params *FindCaseActivityDefaultSpaceParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewFindCaseActivityDefaultSpaceRequest(c.Server, caseId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostChatMessageWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostChatMessageRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostChatMessage(ctx context.Context, body PostChatMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostChatMessageRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -190861,6 +191533,30 @@ func (c *Client) PostSyntheticMonitors(ctx context.Context, body PostSyntheticMo
 	return c.Client.Do(req)
 }
 
+func (c *Client) PostSyntheticMonitorsBulkCreateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostSyntheticMonitorsBulkCreateRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostSyntheticMonitorsBulkCreate(ctx context.Context, body PostSyntheticMonitorsBulkCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostSyntheticMonitorsBulkCreateRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) DeleteSyntheticMonitorsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteSyntheticMonitorsRequestWithBody(c.Server, contentType, body)
 	if err != nil {
@@ -197448,24 +198144,24 @@ func NewPostAlertingV2AlertsBulkUnackRequestWithBody(server string, contentType 
 	return req, nil
 }
 
-// NewPostAlertingV2AlertsAlertIdAckRequest calls the generic PostAlertingV2AlertsAlertIdAck builder with application/json body
-func NewPostAlertingV2AlertsAlertIdAckRequest(server string, alertId string, body PostAlertingV2AlertsAlertIdAckJSONRequestBody) (*http.Request, error) {
+// NewPostAlertingV2AlertsIdAckRequest calls the generic PostAlertingV2AlertsIdAck builder with application/json body
+func NewPostAlertingV2AlertsIdAckRequest(server string, id string, body PostAlertingV2AlertsIdAckJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewPostAlertingV2AlertsAlertIdAckRequestWithBody(server, alertId, "application/json", bodyReader)
+	return NewPostAlertingV2AlertsIdAckRequestWithBody(server, id, "application/json", bodyReader)
 }
 
-// NewPostAlertingV2AlertsAlertIdAckRequestWithBody generates requests for PostAlertingV2AlertsAlertIdAck with any type of body
-func NewPostAlertingV2AlertsAlertIdAckRequestWithBody(server string, alertId string, contentType string, body io.Reader) (*http.Request, error) {
+// NewPostAlertingV2AlertsIdAckRequestWithBody generates requests for PostAlertingV2AlertsIdAck with any type of body
+func NewPostAlertingV2AlertsIdAckRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
 
-	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "alert_id", alertId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
 	if err != nil {
 		return nil, err
 	}
@@ -197495,24 +198191,24 @@ func NewPostAlertingV2AlertsAlertIdAckRequestWithBody(server string, alertId str
 	return req, nil
 }
 
-// NewPostAlertingV2AlertsAlertIdActivateRequest calls the generic PostAlertingV2AlertsAlertIdActivate builder with application/json body
-func NewPostAlertingV2AlertsAlertIdActivateRequest(server string, alertId string, body PostAlertingV2AlertsAlertIdActivateJSONRequestBody) (*http.Request, error) {
+// NewPostAlertingV2AlertsIdActivateRequest calls the generic PostAlertingV2AlertsIdActivate builder with application/json body
+func NewPostAlertingV2AlertsIdActivateRequest(server string, id string, body PostAlertingV2AlertsIdActivateJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewPostAlertingV2AlertsAlertIdActivateRequestWithBody(server, alertId, "application/json", bodyReader)
+	return NewPostAlertingV2AlertsIdActivateRequestWithBody(server, id, "application/json", bodyReader)
 }
 
-// NewPostAlertingV2AlertsAlertIdActivateRequestWithBody generates requests for PostAlertingV2AlertsAlertIdActivate with any type of body
-func NewPostAlertingV2AlertsAlertIdActivateRequestWithBody(server string, alertId string, contentType string, body io.Reader) (*http.Request, error) {
+// NewPostAlertingV2AlertsIdActivateRequestWithBody generates requests for PostAlertingV2AlertsIdActivate with any type of body
+func NewPostAlertingV2AlertsIdActivateRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
 
-	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "alert_id", alertId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
 	if err != nil {
 		return nil, err
 	}
@@ -197542,24 +198238,24 @@ func NewPostAlertingV2AlertsAlertIdActivateRequestWithBody(server string, alertI
 	return req, nil
 }
 
-// NewPostAlertingV2AlertsAlertIdAssignRequest calls the generic PostAlertingV2AlertsAlertIdAssign builder with application/json body
-func NewPostAlertingV2AlertsAlertIdAssignRequest(server string, alertId string, body PostAlertingV2AlertsAlertIdAssignJSONRequestBody) (*http.Request, error) {
+// NewPostAlertingV2AlertsIdAssignRequest calls the generic PostAlertingV2AlertsIdAssign builder with application/json body
+func NewPostAlertingV2AlertsIdAssignRequest(server string, id string, body PostAlertingV2AlertsIdAssignJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewPostAlertingV2AlertsAlertIdAssignRequestWithBody(server, alertId, "application/json", bodyReader)
+	return NewPostAlertingV2AlertsIdAssignRequestWithBody(server, id, "application/json", bodyReader)
 }
 
-// NewPostAlertingV2AlertsAlertIdAssignRequestWithBody generates requests for PostAlertingV2AlertsAlertIdAssign with any type of body
-func NewPostAlertingV2AlertsAlertIdAssignRequestWithBody(server string, alertId string, contentType string, body io.Reader) (*http.Request, error) {
+// NewPostAlertingV2AlertsIdAssignRequestWithBody generates requests for PostAlertingV2AlertsIdAssign with any type of body
+func NewPostAlertingV2AlertsIdAssignRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
 
-	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "alert_id", alertId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
 	if err != nil {
 		return nil, err
 	}
@@ -197589,24 +198285,24 @@ func NewPostAlertingV2AlertsAlertIdAssignRequestWithBody(server string, alertId 
 	return req, nil
 }
 
-// NewPostAlertingV2AlertsAlertIdDeactivateRequest calls the generic PostAlertingV2AlertsAlertIdDeactivate builder with application/json body
-func NewPostAlertingV2AlertsAlertIdDeactivateRequest(server string, alertId string, body PostAlertingV2AlertsAlertIdDeactivateJSONRequestBody) (*http.Request, error) {
+// NewPostAlertingV2AlertsIdDeactivateRequest calls the generic PostAlertingV2AlertsIdDeactivate builder with application/json body
+func NewPostAlertingV2AlertsIdDeactivateRequest(server string, id string, body PostAlertingV2AlertsIdDeactivateJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewPostAlertingV2AlertsAlertIdDeactivateRequestWithBody(server, alertId, "application/json", bodyReader)
+	return NewPostAlertingV2AlertsIdDeactivateRequestWithBody(server, id, "application/json", bodyReader)
 }
 
-// NewPostAlertingV2AlertsAlertIdDeactivateRequestWithBody generates requests for PostAlertingV2AlertsAlertIdDeactivate with any type of body
-func NewPostAlertingV2AlertsAlertIdDeactivateRequestWithBody(server string, alertId string, contentType string, body io.Reader) (*http.Request, error) {
+// NewPostAlertingV2AlertsIdDeactivateRequestWithBody generates requests for PostAlertingV2AlertsIdDeactivate with any type of body
+func NewPostAlertingV2AlertsIdDeactivateRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
 
-	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "alert_id", alertId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
 	if err != nil {
 		return nil, err
 	}
@@ -197636,24 +198332,24 @@ func NewPostAlertingV2AlertsAlertIdDeactivateRequestWithBody(server string, aler
 	return req, nil
 }
 
-// NewPostAlertingV2AlertsAlertIdTagRequest calls the generic PostAlertingV2AlertsAlertIdTag builder with application/json body
-func NewPostAlertingV2AlertsAlertIdTagRequest(server string, alertId string, body PostAlertingV2AlertsAlertIdTagJSONRequestBody) (*http.Request, error) {
+// NewPostAlertingV2AlertsIdTagRequest calls the generic PostAlertingV2AlertsIdTag builder with application/json body
+func NewPostAlertingV2AlertsIdTagRequest(server string, id string, body PostAlertingV2AlertsIdTagJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewPostAlertingV2AlertsAlertIdTagRequestWithBody(server, alertId, "application/json", bodyReader)
+	return NewPostAlertingV2AlertsIdTagRequestWithBody(server, id, "application/json", bodyReader)
 }
 
-// NewPostAlertingV2AlertsAlertIdTagRequestWithBody generates requests for PostAlertingV2AlertsAlertIdTag with any type of body
-func NewPostAlertingV2AlertsAlertIdTagRequestWithBody(server string, alertId string, contentType string, body io.Reader) (*http.Request, error) {
+// NewPostAlertingV2AlertsIdTagRequestWithBody generates requests for PostAlertingV2AlertsIdTag with any type of body
+func NewPostAlertingV2AlertsIdTagRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
 
-	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "alert_id", alertId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
 	if err != nil {
 		return nil, err
 	}
@@ -197683,24 +198379,24 @@ func NewPostAlertingV2AlertsAlertIdTagRequestWithBody(server string, alertId str
 	return req, nil
 }
 
-// NewPostAlertingV2AlertsAlertIdUnackRequest calls the generic PostAlertingV2AlertsAlertIdUnack builder with application/json body
-func NewPostAlertingV2AlertsAlertIdUnackRequest(server string, alertId string, body PostAlertingV2AlertsAlertIdUnackJSONRequestBody) (*http.Request, error) {
+// NewPostAlertingV2AlertsIdUnackRequest calls the generic PostAlertingV2AlertsIdUnack builder with application/json body
+func NewPostAlertingV2AlertsIdUnackRequest(server string, id string, body PostAlertingV2AlertsIdUnackJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewPostAlertingV2AlertsAlertIdUnackRequestWithBody(server, alertId, "application/json", bodyReader)
+	return NewPostAlertingV2AlertsIdUnackRequestWithBody(server, id, "application/json", bodyReader)
 }
 
-// NewPostAlertingV2AlertsAlertIdUnackRequestWithBody generates requests for PostAlertingV2AlertsAlertIdUnack with any type of body
-func NewPostAlertingV2AlertsAlertIdUnackRequestWithBody(server string, alertId string, contentType string, body io.Reader) (*http.Request, error) {
+// NewPostAlertingV2AlertsIdUnackRequestWithBody generates requests for PostAlertingV2AlertsIdUnack with any type of body
+func NewPostAlertingV2AlertsIdUnackRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
 
-	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "alert_id", alertId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
 	if err != nil {
 		return nil, err
 	}
@@ -203013,6 +203709,46 @@ func NewFindCaseActivityDefaultSpaceRequest(server string, caseId CasesCaseId, p
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewPostChatMessageRequest calls the generic PostChatMessage builder with application/json body
+func NewPostChatMessageRequest(server string, body PostChatMessageJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostChatMessageRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostChatMessageRequestWithBody generates requests for PostChatMessage with any type of body
+func NewPostChatMessageRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/chat/message")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -225502,6 +226238,46 @@ func NewPostSyntheticMonitorsRequestWithBody(server string, contentType string, 
 	return req, nil
 }
 
+// NewPostSyntheticMonitorsBulkCreateRequest calls the generic PostSyntheticMonitorsBulkCreate builder with application/json body
+func NewPostSyntheticMonitorsBulkCreateRequest(server string, body PostSyntheticMonitorsBulkCreateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostSyntheticMonitorsBulkCreateRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostSyntheticMonitorsBulkCreateRequestWithBody generates requests for PostSyntheticMonitorsBulkCreate with any type of body
+func NewPostSyntheticMonitorsBulkCreateRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/synthetics/monitors/_bulk_create")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewDeleteSyntheticMonitorsRequest calls the generic DeleteSyntheticMonitors builder with application/json body
 func NewDeleteSyntheticMonitorsRequest(server string, body DeleteSyntheticMonitorsJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -233122,35 +233898,35 @@ type ClientWithResponsesInterface interface {
 
 	PostAlertingV2AlertsBulkUnackWithResponse(ctx context.Context, body PostAlertingV2AlertsBulkUnackJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsBulkUnackResponse, error)
 
-	// PostAlertingV2AlertsAlertIdAckWithBodyWithResponse request with any body
-	PostAlertingV2AlertsAlertIdAckWithBodyWithResponse(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdAckResponse, error)
+	// PostAlertingV2AlertsIdAckWithBodyWithResponse request with any body
+	PostAlertingV2AlertsIdAckWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdAckResponse, error)
 
-	PostAlertingV2AlertsAlertIdAckWithResponse(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdAckJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdAckResponse, error)
+	PostAlertingV2AlertsIdAckWithResponse(ctx context.Context, id string, body PostAlertingV2AlertsIdAckJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdAckResponse, error)
 
-	// PostAlertingV2AlertsAlertIdActivateWithBodyWithResponse request with any body
-	PostAlertingV2AlertsAlertIdActivateWithBodyWithResponse(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdActivateResponse, error)
+	// PostAlertingV2AlertsIdActivateWithBodyWithResponse request with any body
+	PostAlertingV2AlertsIdActivateWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdActivateResponse, error)
 
-	PostAlertingV2AlertsAlertIdActivateWithResponse(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdActivateJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdActivateResponse, error)
+	PostAlertingV2AlertsIdActivateWithResponse(ctx context.Context, id string, body PostAlertingV2AlertsIdActivateJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdActivateResponse, error)
 
-	// PostAlertingV2AlertsAlertIdAssignWithBodyWithResponse request with any body
-	PostAlertingV2AlertsAlertIdAssignWithBodyWithResponse(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdAssignResponse, error)
+	// PostAlertingV2AlertsIdAssignWithBodyWithResponse request with any body
+	PostAlertingV2AlertsIdAssignWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdAssignResponse, error)
 
-	PostAlertingV2AlertsAlertIdAssignWithResponse(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdAssignJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdAssignResponse, error)
+	PostAlertingV2AlertsIdAssignWithResponse(ctx context.Context, id string, body PostAlertingV2AlertsIdAssignJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdAssignResponse, error)
 
-	// PostAlertingV2AlertsAlertIdDeactivateWithBodyWithResponse request with any body
-	PostAlertingV2AlertsAlertIdDeactivateWithBodyWithResponse(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdDeactivateResponse, error)
+	// PostAlertingV2AlertsIdDeactivateWithBodyWithResponse request with any body
+	PostAlertingV2AlertsIdDeactivateWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdDeactivateResponse, error)
 
-	PostAlertingV2AlertsAlertIdDeactivateWithResponse(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdDeactivateJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdDeactivateResponse, error)
+	PostAlertingV2AlertsIdDeactivateWithResponse(ctx context.Context, id string, body PostAlertingV2AlertsIdDeactivateJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdDeactivateResponse, error)
 
-	// PostAlertingV2AlertsAlertIdTagWithBodyWithResponse request with any body
-	PostAlertingV2AlertsAlertIdTagWithBodyWithResponse(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdTagResponse, error)
+	// PostAlertingV2AlertsIdTagWithBodyWithResponse request with any body
+	PostAlertingV2AlertsIdTagWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdTagResponse, error)
 
-	PostAlertingV2AlertsAlertIdTagWithResponse(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdTagJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdTagResponse, error)
+	PostAlertingV2AlertsIdTagWithResponse(ctx context.Context, id string, body PostAlertingV2AlertsIdTagJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdTagResponse, error)
 
-	// PostAlertingV2AlertsAlertIdUnackWithBodyWithResponse request with any body
-	PostAlertingV2AlertsAlertIdUnackWithBodyWithResponse(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdUnackResponse, error)
+	// PostAlertingV2AlertsIdUnackWithBodyWithResponse request with any body
+	PostAlertingV2AlertsIdUnackWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdUnackResponse, error)
 
-	PostAlertingV2AlertsAlertIdUnackWithResponse(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdUnackJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdUnackResponse, error)
+	PostAlertingV2AlertsIdUnackWithResponse(ctx context.Context, id string, body PostAlertingV2AlertsIdUnackJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdUnackResponse, error)
 
 	// GetAlertingV2ExecutionHistoryActionPoliciesWithResponse request
 	GetAlertingV2ExecutionHistoryActionPoliciesWithResponse(ctx context.Context, params *GetAlertingV2ExecutionHistoryActionPoliciesParams, reqEditors ...RequestEditorFn) (*GetAlertingV2ExecutionHistoryActionPoliciesResponse, error)
@@ -233499,6 +234275,11 @@ type ClientWithResponsesInterface interface {
 
 	// FindCaseActivityDefaultSpaceWithResponse request
 	FindCaseActivityDefaultSpaceWithResponse(ctx context.Context, caseId CasesCaseId, params *FindCaseActivityDefaultSpaceParams, reqEditors ...RequestEditorFn) (*FindCaseActivityDefaultSpaceResponse, error)
+
+	// PostChatMessageWithBodyWithResponse request with any body
+	PostChatMessageWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostChatMessageResponse, error)
+
+	PostChatMessageWithResponse(ctx context.Context, body PostChatMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*PostChatMessageResponse, error)
 
 	// GetContextEngineAiIndexWithResponse request
 	GetContextEngineAiIndexWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetContextEngineAiIndexResponse, error)
@@ -235193,6 +235974,11 @@ type ClientWithResponsesInterface interface {
 	PostSyntheticMonitorsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostSyntheticMonitorsResponse, error)
 
 	PostSyntheticMonitorsWithResponse(ctx context.Context, body PostSyntheticMonitorsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostSyntheticMonitorsResponse, error)
+
+	// PostSyntheticMonitorsBulkCreateWithBodyWithResponse request with any body
+	PostSyntheticMonitorsBulkCreateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostSyntheticMonitorsBulkCreateResponse, error)
+
+	PostSyntheticMonitorsBulkCreateWithResponse(ctx context.Context, body PostSyntheticMonitorsBulkCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*PostSyntheticMonitorsBulkCreateResponse, error)
 
 	// DeleteSyntheticMonitorsWithBodyWithResponse request with any body
 	DeleteSyntheticMonitorsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DeleteSyntheticMonitorsResponse, error)
@@ -238756,7 +239542,7 @@ func (r PostAlertingV2AlertsBulkUnackResponse) ContentType() string {
 	return ""
 }
 
-type PostAlertingV2AlertsAlertIdAckResponse struct {
+type PostAlertingV2AlertsIdAckResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON400      *KibanaHTTPAPIsAlertingErrorResponse
@@ -238768,7 +239554,7 @@ type PostAlertingV2AlertsAlertIdAckResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r PostAlertingV2AlertsAlertIdAckResponse) Status() string {
+func (r PostAlertingV2AlertsIdAckResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -238776,7 +239562,7 @@ func (r PostAlertingV2AlertsAlertIdAckResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PostAlertingV2AlertsAlertIdAckResponse) StatusCode() int {
+func (r PostAlertingV2AlertsIdAckResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -238784,14 +239570,14 @@ func (r PostAlertingV2AlertsAlertIdAckResponse) StatusCode() int {
 }
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
-func (r PostAlertingV2AlertsAlertIdAckResponse) ContentType() string {
+func (r PostAlertingV2AlertsIdAckResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
 	return ""
 }
 
-type PostAlertingV2AlertsAlertIdActivateResponse struct {
+type PostAlertingV2AlertsIdActivateResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON400      *KibanaHTTPAPIsAlertingErrorResponse
@@ -238804,7 +239590,7 @@ type PostAlertingV2AlertsAlertIdActivateResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r PostAlertingV2AlertsAlertIdActivateResponse) Status() string {
+func (r PostAlertingV2AlertsIdActivateResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -238812,7 +239598,7 @@ func (r PostAlertingV2AlertsAlertIdActivateResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PostAlertingV2AlertsAlertIdActivateResponse) StatusCode() int {
+func (r PostAlertingV2AlertsIdActivateResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -238820,14 +239606,14 @@ func (r PostAlertingV2AlertsAlertIdActivateResponse) StatusCode() int {
 }
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
-func (r PostAlertingV2AlertsAlertIdActivateResponse) ContentType() string {
+func (r PostAlertingV2AlertsIdActivateResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
 	return ""
 }
 
-type PostAlertingV2AlertsAlertIdAssignResponse struct {
+type PostAlertingV2AlertsIdAssignResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON400      *KibanaHTTPAPIsAlertingErrorResponse
@@ -238839,7 +239625,7 @@ type PostAlertingV2AlertsAlertIdAssignResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r PostAlertingV2AlertsAlertIdAssignResponse) Status() string {
+func (r PostAlertingV2AlertsIdAssignResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -238847,7 +239633,7 @@ func (r PostAlertingV2AlertsAlertIdAssignResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PostAlertingV2AlertsAlertIdAssignResponse) StatusCode() int {
+func (r PostAlertingV2AlertsIdAssignResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -238855,14 +239641,14 @@ func (r PostAlertingV2AlertsAlertIdAssignResponse) StatusCode() int {
 }
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
-func (r PostAlertingV2AlertsAlertIdAssignResponse) ContentType() string {
+func (r PostAlertingV2AlertsIdAssignResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
 	return ""
 }
 
-type PostAlertingV2AlertsAlertIdDeactivateResponse struct {
+type PostAlertingV2AlertsIdDeactivateResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON400      *KibanaHTTPAPIsAlertingErrorResponse
@@ -238875,7 +239661,7 @@ type PostAlertingV2AlertsAlertIdDeactivateResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r PostAlertingV2AlertsAlertIdDeactivateResponse) Status() string {
+func (r PostAlertingV2AlertsIdDeactivateResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -238883,7 +239669,7 @@ func (r PostAlertingV2AlertsAlertIdDeactivateResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PostAlertingV2AlertsAlertIdDeactivateResponse) StatusCode() int {
+func (r PostAlertingV2AlertsIdDeactivateResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -238891,14 +239677,14 @@ func (r PostAlertingV2AlertsAlertIdDeactivateResponse) StatusCode() int {
 }
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
-func (r PostAlertingV2AlertsAlertIdDeactivateResponse) ContentType() string {
+func (r PostAlertingV2AlertsIdDeactivateResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
 	return ""
 }
 
-type PostAlertingV2AlertsAlertIdTagResponse struct {
+type PostAlertingV2AlertsIdTagResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON400      *KibanaHTTPAPIsAlertingErrorResponse
@@ -238910,7 +239696,7 @@ type PostAlertingV2AlertsAlertIdTagResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r PostAlertingV2AlertsAlertIdTagResponse) Status() string {
+func (r PostAlertingV2AlertsIdTagResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -238918,7 +239704,7 @@ func (r PostAlertingV2AlertsAlertIdTagResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PostAlertingV2AlertsAlertIdTagResponse) StatusCode() int {
+func (r PostAlertingV2AlertsIdTagResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -238926,14 +239712,14 @@ func (r PostAlertingV2AlertsAlertIdTagResponse) StatusCode() int {
 }
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
-func (r PostAlertingV2AlertsAlertIdTagResponse) ContentType() string {
+func (r PostAlertingV2AlertsIdTagResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
 	return ""
 }
 
-type PostAlertingV2AlertsAlertIdUnackResponse struct {
+type PostAlertingV2AlertsIdUnackResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON400      *KibanaHTTPAPIsAlertingErrorResponse
@@ -238945,7 +239731,7 @@ type PostAlertingV2AlertsAlertIdUnackResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r PostAlertingV2AlertsAlertIdUnackResponse) Status() string {
+func (r PostAlertingV2AlertsIdUnackResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -238953,7 +239739,7 @@ func (r PostAlertingV2AlertsAlertIdUnackResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PostAlertingV2AlertsAlertIdUnackResponse) StatusCode() int {
+func (r PostAlertingV2AlertsIdUnackResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -238961,7 +239747,7 @@ func (r PostAlertingV2AlertsAlertIdUnackResponse) StatusCode() int {
 }
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
-func (r PostAlertingV2AlertsAlertIdUnackResponse) ContentType() string {
+func (r PostAlertingV2AlertsIdUnackResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
@@ -241235,6 +242021,9 @@ type GetCaseConfigurationDefaultSpaceResponse struct {
 			Username   *string `json:"username"`
 		} `json:"updated_by,omitempty"`
 		Version *string `json:"version,omitempty"`
+
+		// WorkflowTags Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+		WorkflowTags *[]string `json:"workflowTags,omitempty"`
 	}
 	JSON401 *CasesResponse4xx
 }
@@ -241338,6 +242127,9 @@ type SetCaseConfigurationDefaultSpaceResponse struct {
 			Username   *string `json:"username"`
 		} `json:"updated_by,omitempty"`
 		Version *string `json:"version,omitempty"`
+
+		// WorkflowTags Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+		WorkflowTags *[]string `json:"workflowTags,omitempty"`
 	}
 	JSON401 *CasesResponse4xx
 }
@@ -241482,6 +242274,9 @@ type UpdateCaseConfigurationDefaultSpaceResponse struct {
 			Username   *string `json:"username"`
 		} `json:"updated_by,omitempty"`
 		Version *string `json:"version,omitempty"`
+
+		// WorkflowTags Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+		WorkflowTags *[]string `json:"workflowTags,omitempty"`
 	}
 	JSON401 *CasesResponse4xx
 }
@@ -242313,6 +243108,51 @@ func (r FindCaseActivityDefaultSpaceResponse) StatusCode() int {
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
 func (r FindCaseActivityDefaultSpaceResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type PostChatMessageResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		// Answer The agent's final text answer. Empty when the agent finished without a message.
+		Answer string `json:"answer"`
+
+		// ConversationId The conversation the message was added to: the one requested, or the one created for it.
+		ConversationId string `json:"conversation_id"`
+
+		// DeclinedPrompts The prompts that the endpoint declined. In an interactive conversation, these prompts pause the agent until the user answers. Examples are tool confirmations, questions to the user, and destructive API approvals. This endpoint has no user, so it declines each prompt and tells the agent why. The property is absent if the agent raised no prompts.
+		DeclinedPrompts *[]struct {
+			// Message The explanation the agent received in place of the prompt.
+			Message string `json:"message"`
+
+			// ToolId The tool whose call was declined.
+			ToolId string `json:"tool_id"`
+		} `json:"declined_prompts,omitempty"`
+	}
+}
+
+// Status returns HTTPResponse.Status
+func (r PostChatMessageResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostChatMessageResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r PostChatMessageResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
@@ -255105,6 +255945,9 @@ type OsqueryGetLiveQueryDetailsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *SecurityOsqueryAPIFindLiveQueryDetailsResponse
+	JSON404      *struct {
+		Message *string `json:"message,omitempty"`
+	}
 }
 
 // Status returns HTTPResponse.Status
@@ -255135,6 +255978,9 @@ type OsqueryGetLiveQueryResultsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *SecurityOsqueryAPIGetLiveQueryResultsResponse
+	JSON404      *struct {
+		Message *string `json:"message,omitempty"`
+	}
 }
 
 // Status returns HTTPResponse.Status
@@ -258988,6 +259834,49 @@ func (r PostSyntheticMonitorsResponse) StatusCode() int {
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
 func (r PostSyntheticMonitorsResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type PostSyntheticMonitorsBulkCreateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		// Errors Optional service-level errors from the bulk sync.
+		Errors *[]interface{} `json:"errors,omitempty"`
+		Result []struct {
+			// Created Whether the monitor Saved Object was created.
+			Created bool `json:"created"`
+
+			// Error Present when `created` is `false`.
+			Error *string `json:"error,omitempty"`
+
+			// Id The config ID of the created monitor.
+			Id string `json:"id"`
+		} `json:"result"`
+	}
+}
+
+// Status returns HTTPResponse.Status
+func (r PostSyntheticMonitorsBulkCreateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostSyntheticMonitorsBulkCreateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r PostSyntheticMonitorsBulkCreateResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
@@ -264456,106 +265345,106 @@ func (c *ClientWithResponses) PostAlertingV2AlertsBulkUnackWithResponse(ctx cont
 	return ParsePostAlertingV2AlertsBulkUnackResponse(rsp)
 }
 
-// PostAlertingV2AlertsAlertIdAckWithBodyWithResponse request with arbitrary body returning *PostAlertingV2AlertsAlertIdAckResponse
-func (c *ClientWithResponses) PostAlertingV2AlertsAlertIdAckWithBodyWithResponse(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdAckResponse, error) {
-	rsp, err := c.PostAlertingV2AlertsAlertIdAckWithBody(ctx, alertId, contentType, body, reqEditors...)
+// PostAlertingV2AlertsIdAckWithBodyWithResponse request with arbitrary body returning *PostAlertingV2AlertsIdAckResponse
+func (c *ClientWithResponses) PostAlertingV2AlertsIdAckWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdAckResponse, error) {
+	rsp, err := c.PostAlertingV2AlertsIdAckWithBody(ctx, id, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostAlertingV2AlertsAlertIdAckResponse(rsp)
+	return ParsePostAlertingV2AlertsIdAckResponse(rsp)
 }
 
-func (c *ClientWithResponses) PostAlertingV2AlertsAlertIdAckWithResponse(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdAckJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdAckResponse, error) {
-	rsp, err := c.PostAlertingV2AlertsAlertIdAck(ctx, alertId, body, reqEditors...)
+func (c *ClientWithResponses) PostAlertingV2AlertsIdAckWithResponse(ctx context.Context, id string, body PostAlertingV2AlertsIdAckJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdAckResponse, error) {
+	rsp, err := c.PostAlertingV2AlertsIdAck(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostAlertingV2AlertsAlertIdAckResponse(rsp)
+	return ParsePostAlertingV2AlertsIdAckResponse(rsp)
 }
 
-// PostAlertingV2AlertsAlertIdActivateWithBodyWithResponse request with arbitrary body returning *PostAlertingV2AlertsAlertIdActivateResponse
-func (c *ClientWithResponses) PostAlertingV2AlertsAlertIdActivateWithBodyWithResponse(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdActivateResponse, error) {
-	rsp, err := c.PostAlertingV2AlertsAlertIdActivateWithBody(ctx, alertId, contentType, body, reqEditors...)
+// PostAlertingV2AlertsIdActivateWithBodyWithResponse request with arbitrary body returning *PostAlertingV2AlertsIdActivateResponse
+func (c *ClientWithResponses) PostAlertingV2AlertsIdActivateWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdActivateResponse, error) {
+	rsp, err := c.PostAlertingV2AlertsIdActivateWithBody(ctx, id, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostAlertingV2AlertsAlertIdActivateResponse(rsp)
+	return ParsePostAlertingV2AlertsIdActivateResponse(rsp)
 }
 
-func (c *ClientWithResponses) PostAlertingV2AlertsAlertIdActivateWithResponse(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdActivateJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdActivateResponse, error) {
-	rsp, err := c.PostAlertingV2AlertsAlertIdActivate(ctx, alertId, body, reqEditors...)
+func (c *ClientWithResponses) PostAlertingV2AlertsIdActivateWithResponse(ctx context.Context, id string, body PostAlertingV2AlertsIdActivateJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdActivateResponse, error) {
+	rsp, err := c.PostAlertingV2AlertsIdActivate(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostAlertingV2AlertsAlertIdActivateResponse(rsp)
+	return ParsePostAlertingV2AlertsIdActivateResponse(rsp)
 }
 
-// PostAlertingV2AlertsAlertIdAssignWithBodyWithResponse request with arbitrary body returning *PostAlertingV2AlertsAlertIdAssignResponse
-func (c *ClientWithResponses) PostAlertingV2AlertsAlertIdAssignWithBodyWithResponse(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdAssignResponse, error) {
-	rsp, err := c.PostAlertingV2AlertsAlertIdAssignWithBody(ctx, alertId, contentType, body, reqEditors...)
+// PostAlertingV2AlertsIdAssignWithBodyWithResponse request with arbitrary body returning *PostAlertingV2AlertsIdAssignResponse
+func (c *ClientWithResponses) PostAlertingV2AlertsIdAssignWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdAssignResponse, error) {
+	rsp, err := c.PostAlertingV2AlertsIdAssignWithBody(ctx, id, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostAlertingV2AlertsAlertIdAssignResponse(rsp)
+	return ParsePostAlertingV2AlertsIdAssignResponse(rsp)
 }
 
-func (c *ClientWithResponses) PostAlertingV2AlertsAlertIdAssignWithResponse(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdAssignJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdAssignResponse, error) {
-	rsp, err := c.PostAlertingV2AlertsAlertIdAssign(ctx, alertId, body, reqEditors...)
+func (c *ClientWithResponses) PostAlertingV2AlertsIdAssignWithResponse(ctx context.Context, id string, body PostAlertingV2AlertsIdAssignJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdAssignResponse, error) {
+	rsp, err := c.PostAlertingV2AlertsIdAssign(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostAlertingV2AlertsAlertIdAssignResponse(rsp)
+	return ParsePostAlertingV2AlertsIdAssignResponse(rsp)
 }
 
-// PostAlertingV2AlertsAlertIdDeactivateWithBodyWithResponse request with arbitrary body returning *PostAlertingV2AlertsAlertIdDeactivateResponse
-func (c *ClientWithResponses) PostAlertingV2AlertsAlertIdDeactivateWithBodyWithResponse(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdDeactivateResponse, error) {
-	rsp, err := c.PostAlertingV2AlertsAlertIdDeactivateWithBody(ctx, alertId, contentType, body, reqEditors...)
+// PostAlertingV2AlertsIdDeactivateWithBodyWithResponse request with arbitrary body returning *PostAlertingV2AlertsIdDeactivateResponse
+func (c *ClientWithResponses) PostAlertingV2AlertsIdDeactivateWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdDeactivateResponse, error) {
+	rsp, err := c.PostAlertingV2AlertsIdDeactivateWithBody(ctx, id, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostAlertingV2AlertsAlertIdDeactivateResponse(rsp)
+	return ParsePostAlertingV2AlertsIdDeactivateResponse(rsp)
 }
 
-func (c *ClientWithResponses) PostAlertingV2AlertsAlertIdDeactivateWithResponse(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdDeactivateJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdDeactivateResponse, error) {
-	rsp, err := c.PostAlertingV2AlertsAlertIdDeactivate(ctx, alertId, body, reqEditors...)
+func (c *ClientWithResponses) PostAlertingV2AlertsIdDeactivateWithResponse(ctx context.Context, id string, body PostAlertingV2AlertsIdDeactivateJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdDeactivateResponse, error) {
+	rsp, err := c.PostAlertingV2AlertsIdDeactivate(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostAlertingV2AlertsAlertIdDeactivateResponse(rsp)
+	return ParsePostAlertingV2AlertsIdDeactivateResponse(rsp)
 }
 
-// PostAlertingV2AlertsAlertIdTagWithBodyWithResponse request with arbitrary body returning *PostAlertingV2AlertsAlertIdTagResponse
-func (c *ClientWithResponses) PostAlertingV2AlertsAlertIdTagWithBodyWithResponse(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdTagResponse, error) {
-	rsp, err := c.PostAlertingV2AlertsAlertIdTagWithBody(ctx, alertId, contentType, body, reqEditors...)
+// PostAlertingV2AlertsIdTagWithBodyWithResponse request with arbitrary body returning *PostAlertingV2AlertsIdTagResponse
+func (c *ClientWithResponses) PostAlertingV2AlertsIdTagWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdTagResponse, error) {
+	rsp, err := c.PostAlertingV2AlertsIdTagWithBody(ctx, id, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostAlertingV2AlertsAlertIdTagResponse(rsp)
+	return ParsePostAlertingV2AlertsIdTagResponse(rsp)
 }
 
-func (c *ClientWithResponses) PostAlertingV2AlertsAlertIdTagWithResponse(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdTagJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdTagResponse, error) {
-	rsp, err := c.PostAlertingV2AlertsAlertIdTag(ctx, alertId, body, reqEditors...)
+func (c *ClientWithResponses) PostAlertingV2AlertsIdTagWithResponse(ctx context.Context, id string, body PostAlertingV2AlertsIdTagJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdTagResponse, error) {
+	rsp, err := c.PostAlertingV2AlertsIdTag(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostAlertingV2AlertsAlertIdTagResponse(rsp)
+	return ParsePostAlertingV2AlertsIdTagResponse(rsp)
 }
 
-// PostAlertingV2AlertsAlertIdUnackWithBodyWithResponse request with arbitrary body returning *PostAlertingV2AlertsAlertIdUnackResponse
-func (c *ClientWithResponses) PostAlertingV2AlertsAlertIdUnackWithBodyWithResponse(ctx context.Context, alertId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdUnackResponse, error) {
-	rsp, err := c.PostAlertingV2AlertsAlertIdUnackWithBody(ctx, alertId, contentType, body, reqEditors...)
+// PostAlertingV2AlertsIdUnackWithBodyWithResponse request with arbitrary body returning *PostAlertingV2AlertsIdUnackResponse
+func (c *ClientWithResponses) PostAlertingV2AlertsIdUnackWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdUnackResponse, error) {
+	rsp, err := c.PostAlertingV2AlertsIdUnackWithBody(ctx, id, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostAlertingV2AlertsAlertIdUnackResponse(rsp)
+	return ParsePostAlertingV2AlertsIdUnackResponse(rsp)
 }
 
-func (c *ClientWithResponses) PostAlertingV2AlertsAlertIdUnackWithResponse(ctx context.Context, alertId string, body PostAlertingV2AlertsAlertIdUnackJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsAlertIdUnackResponse, error) {
-	rsp, err := c.PostAlertingV2AlertsAlertIdUnack(ctx, alertId, body, reqEditors...)
+func (c *ClientWithResponses) PostAlertingV2AlertsIdUnackWithResponse(ctx context.Context, id string, body PostAlertingV2AlertsIdUnackJSONRequestBody, reqEditors ...RequestEditorFn) (*PostAlertingV2AlertsIdUnackResponse, error) {
+	rsp, err := c.PostAlertingV2AlertsIdUnack(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostAlertingV2AlertsAlertIdUnackResponse(rsp)
+	return ParsePostAlertingV2AlertsIdUnackResponse(rsp)
 }
 
 // GetAlertingV2ExecutionHistoryActionPoliciesWithResponse request returning *GetAlertingV2ExecutionHistoryActionPoliciesResponse
@@ -265678,6 +266567,23 @@ func (c *ClientWithResponses) FindCaseActivityDefaultSpaceWithResponse(ctx conte
 		return nil, err
 	}
 	return ParseFindCaseActivityDefaultSpaceResponse(rsp)
+}
+
+// PostChatMessageWithBodyWithResponse request with arbitrary body returning *PostChatMessageResponse
+func (c *ClientWithResponses) PostChatMessageWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostChatMessageResponse, error) {
+	rsp, err := c.PostChatMessageWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostChatMessageResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostChatMessageWithResponse(ctx context.Context, body PostChatMessageJSONRequestBody, reqEditors ...RequestEditorFn) (*PostChatMessageResponse, error) {
+	rsp, err := c.PostChatMessage(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostChatMessageResponse(rsp)
 }
 
 // GetContextEngineAiIndexWithResponse request returning *GetContextEngineAiIndexResponse
@@ -271166,6 +272072,23 @@ func (c *ClientWithResponses) PostSyntheticMonitorsWithResponse(ctx context.Cont
 	return ParsePostSyntheticMonitorsResponse(rsp)
 }
 
+// PostSyntheticMonitorsBulkCreateWithBodyWithResponse request with arbitrary body returning *PostSyntheticMonitorsBulkCreateResponse
+func (c *ClientWithResponses) PostSyntheticMonitorsBulkCreateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostSyntheticMonitorsBulkCreateResponse, error) {
+	rsp, err := c.PostSyntheticMonitorsBulkCreateWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostSyntheticMonitorsBulkCreateResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostSyntheticMonitorsBulkCreateWithResponse(ctx context.Context, body PostSyntheticMonitorsBulkCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*PostSyntheticMonitorsBulkCreateResponse, error) {
+	rsp, err := c.PostSyntheticMonitorsBulkCreate(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostSyntheticMonitorsBulkCreateResponse(rsp)
+}
+
 // DeleteSyntheticMonitorsWithBodyWithResponse request with arbitrary body returning *DeleteSyntheticMonitorsResponse
 func (c *ClientWithResponses) DeleteSyntheticMonitorsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DeleteSyntheticMonitorsResponse, error) {
 	rsp, err := c.DeleteSyntheticMonitorsWithBody(ctx, contentType, body, reqEditors...)
@@ -275747,15 +276670,15 @@ func ParsePostAlertingV2AlertsBulkUnackResponse(rsp *http.Response) (*PostAlerti
 	return response, nil
 }
 
-// ParsePostAlertingV2AlertsAlertIdAckResponse parses an HTTP response from a PostAlertingV2AlertsAlertIdAckWithResponse call
-func ParsePostAlertingV2AlertsAlertIdAckResponse(rsp *http.Response) (*PostAlertingV2AlertsAlertIdAckResponse, error) {
+// ParsePostAlertingV2AlertsIdAckResponse parses an HTTP response from a PostAlertingV2AlertsIdAckWithResponse call
+func ParsePostAlertingV2AlertsIdAckResponse(rsp *http.Response) (*PostAlertingV2AlertsIdAckResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &PostAlertingV2AlertsAlertIdAckResponse{
+	response := &PostAlertingV2AlertsIdAckResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -275808,144 +276731,15 @@ func ParsePostAlertingV2AlertsAlertIdAckResponse(rsp *http.Response) (*PostAlert
 	return response, nil
 }
 
-// ParsePostAlertingV2AlertsAlertIdActivateResponse parses an HTTP response from a PostAlertingV2AlertsAlertIdActivateWithResponse call
-func ParsePostAlertingV2AlertsAlertIdActivateResponse(rsp *http.Response) (*PostAlertingV2AlertsAlertIdActivateResponse, error) {
+// ParsePostAlertingV2AlertsIdActivateResponse parses an HTTP response from a PostAlertingV2AlertsIdActivateWithResponse call
+func ParsePostAlertingV2AlertsIdActivateResponse(rsp *http.Response) (*PostAlertingV2AlertsIdActivateResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &PostAlertingV2AlertsAlertIdActivateResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest KibanaHTTPAPIsAlertingErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
-		var dest KibanaHTTPAPIsAlertingErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON401 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
-		var dest KibanaHTTPAPIsAlertingErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON403 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
-		var dest KibanaHTTPAPIsAlertingErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON404 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
-		var dest KibanaHTTPAPIsAlertingErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON409 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest KibanaHTTPAPIsAlertingErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
-		var dest KibanaHTTPAPIsAlertingErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON503 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParsePostAlertingV2AlertsAlertIdAssignResponse parses an HTTP response from a PostAlertingV2AlertsAlertIdAssignWithResponse call
-func ParsePostAlertingV2AlertsAlertIdAssignResponse(rsp *http.Response) (*PostAlertingV2AlertsAlertIdAssignResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &PostAlertingV2AlertsAlertIdAssignResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest KibanaHTTPAPIsAlertingErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
-		var dest KibanaHTTPAPIsAlertingErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON401 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
-		var dest KibanaHTTPAPIsAlertingErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON403 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
-		var dest KibanaHTTPAPIsAlertingErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON404 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest KibanaHTTPAPIsAlertingErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
-		var dest KibanaHTTPAPIsAlertingErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON503 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParsePostAlertingV2AlertsAlertIdDeactivateResponse parses an HTTP response from a PostAlertingV2AlertsAlertIdDeactivateWithResponse call
-func ParsePostAlertingV2AlertsAlertIdDeactivateResponse(rsp *http.Response) (*PostAlertingV2AlertsAlertIdDeactivateResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &PostAlertingV2AlertsAlertIdDeactivateResponse{
+	response := &PostAlertingV2AlertsIdActivateResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -276005,15 +276799,15 @@ func ParsePostAlertingV2AlertsAlertIdDeactivateResponse(rsp *http.Response) (*Po
 	return response, nil
 }
 
-// ParsePostAlertingV2AlertsAlertIdTagResponse parses an HTTP response from a PostAlertingV2AlertsAlertIdTagWithResponse call
-func ParsePostAlertingV2AlertsAlertIdTagResponse(rsp *http.Response) (*PostAlertingV2AlertsAlertIdTagResponse, error) {
+// ParsePostAlertingV2AlertsIdAssignResponse parses an HTTP response from a PostAlertingV2AlertsIdAssignWithResponse call
+func ParsePostAlertingV2AlertsIdAssignResponse(rsp *http.Response) (*PostAlertingV2AlertsIdAssignResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &PostAlertingV2AlertsAlertIdTagResponse{
+	response := &PostAlertingV2AlertsIdAssignResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -276066,15 +276860,144 @@ func ParsePostAlertingV2AlertsAlertIdTagResponse(rsp *http.Response) (*PostAlert
 	return response, nil
 }
 
-// ParsePostAlertingV2AlertsAlertIdUnackResponse parses an HTTP response from a PostAlertingV2AlertsAlertIdUnackWithResponse call
-func ParsePostAlertingV2AlertsAlertIdUnackResponse(rsp *http.Response) (*PostAlertingV2AlertsAlertIdUnackResponse, error) {
+// ParsePostAlertingV2AlertsIdDeactivateResponse parses an HTTP response from a PostAlertingV2AlertsIdDeactivateWithResponse call
+func ParsePostAlertingV2AlertsIdDeactivateResponse(rsp *http.Response) (*PostAlertingV2AlertsIdDeactivateResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &PostAlertingV2AlertsAlertIdUnackResponse{
+	response := &PostAlertingV2AlertsIdDeactivateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest KibanaHTTPAPIsAlertingErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest KibanaHTTPAPIsAlertingErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest KibanaHTTPAPIsAlertingErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest KibanaHTTPAPIsAlertingErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest KibanaHTTPAPIsAlertingErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest KibanaHTTPAPIsAlertingErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest KibanaHTTPAPIsAlertingErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostAlertingV2AlertsIdTagResponse parses an HTTP response from a PostAlertingV2AlertsIdTagWithResponse call
+func ParsePostAlertingV2AlertsIdTagResponse(rsp *http.Response) (*PostAlertingV2AlertsIdTagResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostAlertingV2AlertsIdTagResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest KibanaHTTPAPIsAlertingErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest KibanaHTTPAPIsAlertingErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest KibanaHTTPAPIsAlertingErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest KibanaHTTPAPIsAlertingErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest KibanaHTTPAPIsAlertingErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 503:
+		var dest KibanaHTTPAPIsAlertingErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON503 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostAlertingV2AlertsIdUnackResponse parses an HTTP response from a PostAlertingV2AlertsIdUnackWithResponse call
+func ParsePostAlertingV2AlertsIdUnackResponse(rsp *http.Response) (*PostAlertingV2AlertsIdUnackResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostAlertingV2AlertsIdUnackResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -279290,6 +280213,9 @@ func ParseGetCaseConfigurationDefaultSpaceResponse(rsp *http.Response) (*GetCase
 				Username   *string `json:"username"`
 			} `json:"updated_by,omitempty"`
 			Version *string `json:"version,omitempty"`
+
+			// WorkflowTags Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+			WorkflowTags *[]string `json:"workflowTags,omitempty"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
@@ -279395,6 +280321,9 @@ func ParseSetCaseConfigurationDefaultSpaceResponse(rsp *http.Response) (*SetCase
 				Username   *string `json:"username"`
 			} `json:"updated_by,omitempty"`
 			Version *string `json:"version,omitempty"`
+
+			// WorkflowTags Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+			WorkflowTags *[]string `json:"workflowTags,omitempty"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
@@ -279543,6 +280472,9 @@ func ParseUpdateCaseConfigurationDefaultSpaceResponse(rsp *http.Response) (*Upda
 				Username   *string `json:"username"`
 			} `json:"updated_by,omitempty"`
 			Version *string `json:"version,omitempty"`
+
+			// WorkflowTags Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+			WorkflowTags *[]string `json:"workflowTags,omitempty"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
@@ -280558,6 +281490,47 @@ func ParseFindCaseActivityDefaultSpaceResponse(rsp *http.Response) (*FindCaseAct
 			return nil, err
 		}
 		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostChatMessageResponse parses an HTTP response from a PostChatMessageWithResponse call
+func ParsePostChatMessageResponse(rsp *http.Response) (*PostChatMessageResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostChatMessageResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			// Answer The agent's final text answer. Empty when the agent finished without a message.
+			Answer string `json:"answer"`
+
+			// ConversationId The conversation the message was added to: the one requested, or the one created for it.
+			ConversationId string `json:"conversation_id"`
+
+			// DeclinedPrompts The prompts that the endpoint declined. In an interactive conversation, these prompts pause the agent until the user answers. Examples are tool confirmations, questions to the user, and destructive API approvals. This endpoint has no user, so it declines each prompt and tells the agent why. The property is absent if the agent raised no prompts.
+			DeclinedPrompts *[]struct {
+				// Message The explanation the agent received in place of the prompt.
+				Message string `json:"message"`
+
+				// ToolId The tool whose call was declined.
+				ToolId string `json:"tool_id"`
+			} `json:"declined_prompts,omitempty"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
 
 	}
 
@@ -294171,6 +295144,15 @@ func ParseOsqueryGetLiveQueryDetailsResponse(rsp *http.Response) (*OsqueryGetLiv
 		}
 		response.JSON200 = &dest
 
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest struct {
+			Message *string `json:"message,omitempty"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
 	}
 
 	return response, nil
@@ -294196,6 +295178,15 @@ func ParseOsqueryGetLiveQueryResultsResponse(rsp *http.Response) (*OsqueryGetLiv
 			return nil, err
 		}
 		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest struct {
+			Message *string `json:"message,omitempty"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
 
 	}
 
@@ -297199,6 +298190,45 @@ func ParsePostSyntheticMonitorsResponse(rsp *http.Response) (*PostSyntheticMonit
 			return nil, err
 		}
 		response.JSON400 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostSyntheticMonitorsBulkCreateResponse parses an HTTP response from a PostSyntheticMonitorsBulkCreateWithResponse call
+func ParsePostSyntheticMonitorsBulkCreateResponse(rsp *http.Response) (*PostSyntheticMonitorsBulkCreateResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostSyntheticMonitorsBulkCreateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			// Errors Optional service-level errors from the bulk sync.
+			Errors *[]interface{} `json:"errors,omitempty"`
+			Result []struct {
+				// Created Whether the monitor Saved Object was created.
+				Created bool `json:"created"`
+
+				// Error Present when `created` is `false`.
+				Error *string `json:"error,omitempty"`
+
+				// Id The config ID of the created monitor.
+				Id string `json:"id"`
+			} `json:"result"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
 
 	}
 
